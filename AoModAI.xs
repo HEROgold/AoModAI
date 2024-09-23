@@ -416,61 +416,61 @@ inactive
     static int lastTargetPlayerID = -1;
     static int randNum = 0;
     static bool increaseStartIndex = false;
-	
-	if (ChangeMHP == true)
-	{
-		if (xsGetTime() > MHPTime + 1*60*1000)
-		ChangeMHP = false;
-		return;
-	}
+    
+    if (ChangeMHP == true)
+    {
+        if (xsGetTime() > MHPTime + 1*60*1000)
+        ChangeMHP = false;
+        return;
+    }
     //Determine a random start index for our hate loop.
     static int startIndex = -1;
     if ((startIndex < 0) || (xsGetTime() > lastTargetPlayerIDSaveTime + (10 + randNum)*60*1000) && (aiRandInt(5) < 1))
     startIndex = getRandomPlayerByRel(cPlayerRelationEnemy);
-	
+    
     int comparePlayerID = -1;
     for (i = 0; < cNumberPlayers)
     {
         //If we're past the end of our players, go back to the start.
         int actualIndex = i + startIndex;
         if (actualIndex >= cNumberPlayers)
-		actualIndex = actualIndex - cNumberPlayers;
+        actualIndex = actualIndex - cNumberPlayers;
         if (actualIndex <= 0)
-		continue;
+        continue;
         if ((kbIsPlayerEnemy(actualIndex) == true) &&
-		(kbIsPlayerResigned(actualIndex) == false) &&
-		(kbHasPlayerLost(actualIndex) == false))
+        (kbIsPlayerResigned(actualIndex) == false) &&
+        (kbHasPlayerLost(actualIndex) == false))
         {
             comparePlayerID = actualIndex;
             break;
-		}
-	}
-	
+        }
+    }
+    
     //Pass the comparePlayerID into the AI to see what he thinks.  He'll take care
     //of modifying the player in the event of wonders, etc.
     int actualPlayerID = -1;
-	
+    
     if (cvPlayerToAttack == -1)
-	actualPlayerID = aiCalculateMostHatedPlayerID(comparePlayerID);
+    actualPlayerID = aiCalculateMostHatedPlayerID(comparePlayerID);
     else
-	actualPlayerID = cvPlayerToAttack;
+    actualPlayerID = cvPlayerToAttack;
     
     if (actualPlayerID != lastTargetPlayerID)
     {
         lastTargetPlayerID = actualPlayerID;
         lastTargetPlayerIDSaveTime = xsGetTime();
         randNum = aiRandInt(5);
-	}
-	
+    }
+    
     if (actualPlayerID != -1)
-	aiSetMostHatedPlayerID(actualPlayerID);
+    aiSetMostHatedPlayerID(actualPlayerID);
 
-	if (AoModAllies == true)
-	{ 
-		if (aiGetCaptainPlayerID(cMyID) != cMyID)
-		return;
-		MessageRel(cPlayerRelationAlly, AttackTarget, aiGetMostHatedPlayerID());
-	}	 
+    if (AoModAllies == true)
+    { 
+        if (aiGetCaptainPlayerID(cMyID) != cMyID)
+        return;
+        MessageRel(cPlayerRelationAlly, AttackTarget, aiGetMostHatedPlayerID());
+    }	 
 }
 
 //==============================================================================
@@ -480,7 +480,7 @@ active
 {
     static int failCount = 0;
     static bool FirstRun = false;    // Special reset in first 5 minutes for wood imbalance while fishing
-	// (Every fishing boat trained gets double-billed.)
+    // (Every fishing boat trained gets double-billed.)
     bool needReset = false;
     int res = -1;
     for (res = 0; < 3)
@@ -494,108 +494,108 @@ active
         actualQty = kbResourceGet(res);
         delta = actualQty - escrowQty;
         if (delta < 0)
-		delta = delta * -1;
+        delta = delta * -1;
         if ( (delta > 20) && (delta > actualQty/5) ) // Off by at least 20, and 20%
         needReset = true;
-	}
-	
+    }
+    
     if (FirstRun == false)
     {
         kbEscrowAllocateCurrentResources();
-		FirstRun = true;
+        FirstRun = true;
         return;
-	}
+    }
     if (needReset == true)
     {
         failCount = failCount+1;
         if (failCount > 0)
         {
-			float OldMilFood = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceFood);
-			float OldMilWood = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceWood);
-			float OldMilGold = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceGold);
-			float OldMilFavor = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceFavor);
-			
-			float OldEcoFood = kbEscrowGetPercentage(cEconomyEscrowID, cResourceFood);
-			float OldEcoWood = kbEscrowGetPercentage(cEconomyEscrowID, cResourceWood);
-			float OldEcoGold = kbEscrowGetPercentage(cEconomyEscrowID, cResourceGold);
-			float OldEcoFavor = kbEscrowGetPercentage(cEconomyEscrowID, cResourceFavor);
-			
+            float OldMilFood = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceFood);
+            float OldMilWood = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceWood);
+            float OldMilGold = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceGold);
+            float OldMilFavor = kbEscrowGetPercentage(cMilitaryEscrowID, cResourceFavor);
+            
+            float OldEcoFood = kbEscrowGetPercentage(cEconomyEscrowID, cResourceFood);
+            float OldEcoWood = kbEscrowGetPercentage(cEconomyEscrowID, cResourceWood);
+            float OldEcoGold = kbEscrowGetPercentage(cEconomyEscrowID, cResourceGold);
+            float OldEcoFavor = kbEscrowGetPercentage(cEconomyEscrowID, cResourceFavor);
+            
             if (kbGetAge() >= cAge1)
-			{
-				for (i = 0; < cNumResourceTypes+1) // also favour
-				{
-					float ActualResource =  kbResourceGet(i);
-					float EcoBankAccount = kbEscrowGetAmount(cEconomyEscrowID, i);
-					float MilBankAccount = kbEscrowGetAmount(cMilitaryEscrowID, i);
-					float RootBankAccount = kbEscrowGetAmount(cRootEscrowID, i);
-					float e =  EcoBankAccount/ ActualResource;
-					float m = MilBankAccount/ ActualResource;
-					float r = RootBankAccount/ ActualResource;
-					if (e > 1.00)
-					e = 1.00;	
-					if (e < 0.0)
-					e = 0.0;
-					if (m > 1.00)
-					m = 1.00;	
-					if (m < 0.0)
-					m = 0.0;
-					if (r > 1.00)
-					r = 1.00;	
-					if (r < 0.0)
-					r = 0.0;					
-					kbEscrowSetPercentage(cEconomyEscrowID, i, e);
-					kbEscrowSetPercentage(cMilitaryEscrowID, i, m);
-					kbEscrowSetPercentage(cRootEscrowID, i, r);	
-				}
-			}
-	        //aiEcho("ERROR:  Escrow balances invalid.  Reallocating");
+            {
+                for (i = 0; < cNumResourceTypes+1) // also favour
+                {
+                    float ActualResource =  kbResourceGet(i);
+                    float EcoBankAccount = kbEscrowGetAmount(cEconomyEscrowID, i);
+                    float MilBankAccount = kbEscrowGetAmount(cMilitaryEscrowID, i);
+                    float RootBankAccount = kbEscrowGetAmount(cRootEscrowID, i);
+                    float e =  EcoBankAccount/ ActualResource;
+                    float m = MilBankAccount/ ActualResource;
+                    float r = RootBankAccount/ ActualResource;
+                    if (e > 1.00)
+                    e = 1.00;	
+                    if (e < 0.0)
+                    e = 0.0;
+                    if (m > 1.00)
+                    m = 1.00;	
+                    if (m < 0.0)
+                    m = 0.0;
+                    if (r > 1.00)
+                    r = 1.00;	
+                    if (r < 0.0)
+                    r = 0.0;					
+                    kbEscrowSetPercentage(cEconomyEscrowID, i, e);
+                    kbEscrowSetPercentage(cMilitaryEscrowID, i, m);
+                    kbEscrowSetPercentage(cRootEscrowID, i, r);	
+                }
+            }
+            //aiEcho("ERROR:  Escrow balances invalid.  Reallocating");
             kbEscrowAllocateCurrentResources();
-			
+            
             kbEscrowSetPercentage(cEconomyEscrowID, cResourceFood, OldEcoFood);
             kbEscrowSetPercentage(cEconomyEscrowID, cResourceWood, OldEcoWood);
             kbEscrowSetPercentage(cEconomyEscrowID, cResourceGold, OldEcoGold);
-			kbEscrowSetPercentage(cEconomyEscrowID, cResourceFavor, OldEcoFavor);
+            kbEscrowSetPercentage(cEconomyEscrowID, cResourceFavor, OldEcoFavor);
             //Military Escrow.
             kbEscrowSetPercentage(cMilitaryEscrowID, cResourceFood, OldMilFood);
             kbEscrowSetPercentage(cMilitaryEscrowID, cResourceWood, OldMilWood);
             kbEscrowSetPercentage(cMilitaryEscrowID, cResourceGold, OldMilGold);
-			kbEscrowSetPercentage(cMilitaryEscrowID, cResourceFavor, OldMilFavor);
-			// Root
-			for (k = 0; < cNumResourceTypes+1)
-			{
+            kbEscrowSetPercentage(cMilitaryEscrowID, cResourceFavor, OldMilFavor);
+            // Root
+            for (k = 0; < cNumResourceTypes+1)
+            {
                 kbEscrowSetPercentage(cRootEscrowID, k, 0.20);
-			}
-		}
-	}
+            }
+        }
+    }
     else
-	failCount = 0;
+    failCount = 0;
 
     float goldSupply = kbResourceGet(cResourceGold);
     float woodSupply = kbResourceGet(cResourceWood);
     float foodSupply = kbResourceGet(cResourceFood);
     float favorSupply = kbResourceGet(cResourceFavor);
     static int count = 0;
-	static int countB = 0;
-	int gathererPUID=kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionGatherer,0);
-	int VilPop = aiPlanGetVariableInt(gCivPopPlanID, cTrainPlanNumberToMaintain, 0);
-	int mainBaseUnitID = getMainBaseUnitIDForPlayer(cMyID);	 
-	int ReserveAmount = 75;
-	if (cMyCulture == cCultureAtlantean)
+    static int countB = 0;
+    int gathererPUID=kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionGatherer,0);
+    int VilPop = aiPlanGetVariableInt(gCivPopPlanID, cTrainPlanNumberToMaintain, 0);
+    int mainBaseUnitID = getMainBaseUnitIDForPlayer(cMyID);	 
+    int ReserveAmount = 75;
+    if (cMyCulture == cCultureAtlantean)
     ReserveAmount = 150;
   
-	if ((kbGetAge() == cAge1) && (kbGetTechStatus(gAge2MinorGod) < cTechStatusResearching))
-	{	 
+    if ((kbGetAge() == cAge1) && (kbGetTechStatus(gAge2MinorGod) < cTechStatusResearching))
+    {	 
         if ((kbResourceGet(cResourceFood) >= 400) && (kbUnitCount(cMyID, cUnitTypeTemple, cUnitStateAlive) > 0))
         aiTaskUnitResearch(findUnit(cUnitTypeAbstractSettlement), gAge2MinorGod);
         if ((kbCanAffordUnit(gathererPUID, cEconomyEscrowID) == true) && (kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAliveOrBuilding) < VilPop) 
-		&& (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAlive) > 0) && (AgingUp() == false) && (kbResourceGet(cResourceFood) < 300) 
+        && (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAlive) > 0) && (AgingUp() == false) && (kbResourceGet(cResourceFood) < 300) 
         && (kbUnitCount(cMyID, gathererPUID, cUnitStateBuilding) == 1))
         {
-		    if ((cMyCulture != cCultureNorse) || (kbUnitCount(cMyID, cUnitTypeOxCart, cUnitStateAliveOrBuilding) > 0) && (kbUnitCount(cMyID, cUnitTypeAbstractInfantry, cUnitStateAliveOrBuilding) > 0))
-			{
+            if ((cMyCulture != cCultureNorse) || (kbUnitCount(cMyID, cUnitTypeOxCart, cUnitStateAliveOrBuilding) > 0) && (kbUnitCount(cMyID, cUnitTypeAbstractInfantry, cUnitStateAliveOrBuilding) > 0))
+            {
                 if (aiTaskUnitTrain(mainBaseUnitID, gathererPUID))
                 FailedToTrain = 0;
-			}
+            }
         }		
     }
     if ((kbGetAge() > cAge1) && (kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAliveOrBuilding) < VilPop))
@@ -610,83 +610,83 @@ active
                 {
                     aiBuyResourceOnMarket(cResourceFood);
                     count = 0;
-				}
+                }
                 else
-				count = count + 1;
-			}			
-		}
+                count = count + 1;
+            }			
+        }
         else
         {
-			count = 0;
-		}
-		float RootAndEcoW = (kbEscrowGetAmount(cEconomyEscrowID, cResourceWood) + kbEscrowGetAmount(cRootEscrowID, cResourceWood));
-		ReserveAmount = 50;
+            count = 0;
+        }
+        float RootAndEcoW = (kbEscrowGetAmount(cEconomyEscrowID, cResourceWood) + kbEscrowGetAmount(cRootEscrowID, cResourceWood));
+        ReserveAmount = 50;
         if ((RootAndEcoW <= ReserveAmount) && (cMyCulture == cCultureAtlantean) 
-		|| (RootAndEcoW <= ReserveAmount) && (cMyCulture == cCultureNorse) && (kbUnitCount(cMyID, cUnitTypeOxCart, cUnitStateAliveOrBuilding) < 3) && (kbGetAge() < cAge3))
+        || (RootAndEcoW <= ReserveAmount) && (cMyCulture == cCultureNorse) && (kbUnitCount(cMyID, cUnitTypeOxCart, cUnitStateAliveOrBuilding) < 3) && (kbGetAge() < cAge3))
         {
-			kbEscrowFlush(cMilitaryEscrowID, cResourceWood, true);
+            kbEscrowFlush(cMilitaryEscrowID, cResourceWood, true);
             if ((kbUnitCount(cMyID, cUnitTypeMarket, cUnitStateAlive) > 0) && (woodSupply < ReserveAmount))
             {
                 if ((aiGetMarketBuyCost(cResourceWood) < goldSupply) && (countB > 1))
                 {
                     aiBuyResourceOnMarket(cResourceWood);
                     countB = 0;
-				}
+                }
                 else
-				countB = countB + 1;
-			}
-		}	
+                countB = countB + 1;
+            }
+        }	
         else
         {		
-			countB = 0;
-		}		
-		
-	}
+            countB = 0;
+        }		
+        
+    }
 
     if ((aiGoalGetNumber(cGoalPlanGoalTypeBuildSettlement, cPlanStateWorking, true) > 0) && (kbUnitCount(0, cUnitTypeAbstractSettlement) > 0) && 
-	(aiPlanGetIDByTypeAndVariableType(cPlanBuild, cBuildPlanBuildingTypeID, cUnitTypeSettlementLevel1, true) > 0) && (foodSupply > 150))
+    (aiPlanGetIDByTypeAndVariableType(cPlanBuild, cBuildPlanBuildingTypeID, cUnitTypeSettlementLevel1, true) > 0) && (foodSupply > 150))
     {
-	    if ((kbGetAge() == cAge2) && (xsGetTime() < 13*60*1000) && (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding) < gEarlySettlementTarget) || (kbGetAge() > cAge2) && (ShouldIAgeUp() == false))
-	    {
-	        float iCost = 0;
-			if (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding) >= gEarlySettlementTarget)
-			iCost = 150;	
+        if ((kbGetAge() == cAge2) && (xsGetTime() < 13*60*1000) && (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding) < gEarlySettlementTarget) || (kbGetAge() > cAge2) && (ShouldIAgeUp() == false))
+        {
+            float iCost = 0;
+            if (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding) >= gEarlySettlementTarget)
+            iCost = 150;	
             if ((cMyCulture != cCultureEgyptian) && (woodSupply > 300+iCost) && (goldSupply > 300+iCost) || (cMyCulture == cCultureEgyptian) && (goldSupply > 400+iCost))
-			{
-				if (cMyCulture != cCultureEgyptian)
-				{
+            {
+                if (cMyCulture != cCultureEgyptian)
+                {
                     kbEscrowFlush(cEconomyEscrowID, cResourceWood, true);
                     kbEscrowFlush(cMilitaryEscrowID, cResourceWood, true);
-				}
+                }
                 kbEscrowFlush(cEconomyEscrowID, cResourceGold, true);
                 kbEscrowFlush(cMilitaryEscrowID, cResourceGold, true);				
                 if (ShowAiEcho == true) aiEcho("Flushing wood and gold escrow");
             }
-	    }
+        }
     }
-	
+    
     if (kbGetAge() == cAge2)
     {
         if ((foodSupply >= 800) && (goldSupply >= 500) && (kbGetTechStatus(gAge3MinorGod) < cTechStatusResearching))
         aiTaskUnitResearch(findUnit(cUnitTypeAbstractSettlement), gAge3MinorGod);
-	}
+    }
     else if (kbGetAge() == cAge3)
     {
         if ((foodSupply >= 1000) && (goldSupply >= 1000) && (kbGetTechStatus(gAge4MinorGod) < cTechStatusResearching) && (kbUnitCount(cMyID, cUnitTypeMarket, cUnitStateAlive) > 0))
         aiTaskUnitResearch(findUnit(cUnitTypeAbstractSettlement), gAge4MinorGod);		
-	}
+    }
     else if (kbGetAge() > cAge3)
     {
         if ((cMyCulture == cCultureGreek) && (gAge4MinorGod == cTechAge4Hephaestus) && (kbGetTechStatus(cTechForgeofOlympus) < cTechStatusResearching) 
-		&& (aiPlanGetIDByTypeAndVariableType(cPlanResearch, cResearchPlanTechID, cTechForgeofOlympus, true) >= 0))
+        && (aiPlanGetIDByTypeAndVariableType(cPlanResearch, cResearchPlanTechID, cTechForgeofOlympus, true) >= 0))
         {
             if ((goldSupply > 300) && (favorSupply > 30))
             aiTaskUnitResearch(findUnit(cUnitTypeArmory), cTechForgeofOlympus);
-		}
+        }
         if ((foodSupply >= 800) && (goldSupply >= 800) && (woodSupply >= 800) && (favorSupply >= 50) && (kbGetTechStatus(cTechSecretsoftheTitans) < cTechStatusResearching) && 
-		(TitanAvailable == true) && (gTransportMap == false))
+        (TitanAvailable == true) && (gTransportMap == false))
         aiTaskUnitResearch(mainBaseUnitID, cTechSecretsoftheTitans);		
-	}
+    }
 }
 
 //==============================================================================
@@ -697,59 +697,59 @@ float econGoldEscrow=0.5, float econFavorEscrow=0.5)
     if (cMyCulture == cCultureNorse) // Make room for at least 3 oxcarts
     {
         if (econPop < 25)
-		econPop = econPop + 3;
-	}
-	
+        econPop = econPop + 3;
+    }
+    
     //Econ Pop (if we're allowed to change it).
     if ((gHardEconomyPopCap > 0) && (econPop > gHardEconomyPopCap))
-	econPop=gHardEconomyPopCap;
+    econPop=gHardEconomyPopCap;
     if ( (econPop > cvMaxGathererPop)  && (cvMaxGathererPop >= 0) )
-	econPop = cvMaxGathererPop;
-	
+    econPop = cvMaxGathererPop;
+    
     // Check if we're second age.  If so, consider capping the mil lower for boomers
     if (kbGetAge() == cAge2)
     {
         if ( (gRushGoalID == -1) ||   /* If we don't have a rush goal, or... */
-		(aiPlanGetVariableInt(gRushGoalID, cGoalPlanExecuteCount, 0) >= aiPlanGetVariableInt(gRushGoalID, cGoalPlanRepeat, 0)) 
-		)  // We have a rush goal, but we're done rushing
+        (aiPlanGetVariableInt(gRushGoalID, cGoalPlanExecuteCount, 0) >= aiPlanGetVariableInt(gRushGoalID, cGoalPlanRepeat, 0)) 
+        )  // We have a rush goal, but we're done rushing
         {
             // Let's decrease our military pop
             float milPopDelta = (cvRushBoomSlider*4.0)/5.0;    // Zero for balanced, -.80 for extreme boom
             if (milPopDelta > 0) 
-			milPopDelta = 0;  // Don't increase for rushers
+            milPopDelta = 0;  // Don't increase for rushers
             // Adjust it for econ/mil scale.  If military, soften the decrease, if economic, preserve full.
             milPopDelta = milPopDelta / (2.0 + cvMilitaryEconSlider);
             milPop = milPop + (milPop * milPopDelta);
-		}
-		if (milPop < 40)
-		milPop = 40;	
-	}
-	
+        }
+        if (milPop < 40)
+        milPop = 40;	
+    }
+    
     if ((milPop < 0) && (cvMaxMilPop >= 0))      // milPop says no limit, but cvMaxMilPop has one
-	milPop = cvMaxMilPop;      
+    milPop = cvMaxMilPop;      
     if ((milPop > cvMaxMilPop) && (cvMaxMilPop >= 0))  // cvMaxMilPop has limit and milPop is over it
-	milPop = cvMaxMilPop;
-	
+    milPop = cvMaxMilPop;
+    
     aiSetEconomyPop(econPop);
     aiSetMilitaryPop(milPop);
-	
+    
     // Check to make sure attack goals have ranges below our milPop limit
     int upID = gRushUPID;
     if (kbGetAge() > cAge2)
-	upID = gLateUPID;
-	
+    upID = gLateUPID;
+    
     int milMin = kbUnitPickGetMinimumPop(upID);
     int milMax = kbUnitPickGetMaximumPop(upID);
     if (milMax > milPop) // We have a problem
     {
         kbUnitPickSetMaximumPop(upID,(milPop*4)/5);
         kbUnitPickSetMinimumPop(upID,(milPop*3)/5);
-	}
+    }
     
     //Percentages.
     aiSetEconomyPercentage(1.0);
     aiSetMilitaryPercentage(1.0);
-	
+    
     //Get the amount of the non-root pie.
     float nonRootEscrow=1.0-rootEscrow;
     //Track whether or not we need to redistribute the resources.
@@ -771,74 +771,74 @@ float econGoldEscrow=0.5, float econFavorEscrow=0.5)
     kbEscrowSetPercentage(cMilitaryEscrowID, cResourceGold, nonRootEscrow*(1.0-econGoldEscrow));
     kbEscrowSetPercentage(cMilitaryEscrowID, cResourceFavor, nonRootEscrow*(1.0-econFavorEscrow));
     if (gSomeData != -1)
-	{
+    {
         aiPlanSetUserVariableFloat(gSomeData, EcoPercentage, 0 , v * 100);
         aiPlanSetUserVariableFloat(gSomeData, MilPercentage, 0 , nonRootEscrow*(1.0-econFoodEscrow) * 100);
-		aiPlanSetUserVariableFloat(gSomeData, RootPercentage, 0 , rootEscrow * 100);
-	}
+        aiPlanSetUserVariableFloat(gSomeData, RootPercentage, 0 , rootEscrow * 100);
+    }
     int vilPop= aiGetEconomyPop();      // Total econ
     if (gFishing == true)
     {
         int fishCount = gNumBoatsToMaintain;
         if ( (aiGetGameMode() == cGameModeLightning) && (fishCount > 5) )
-		fishCount = 5;
+        fishCount = 5;
         vilPop = vilPop - fishCount; // Less fishing
-	}
-	
+    }
+    
     int numTradeUnits = kbUnitCount(cMyID, cUnitTypeAbstractTradeUnit, cUnitStateAlive);
     if (numTradeUnits > 0)
     {
         int tradeCount = numTradeUnits;
         if ((aiGetGameMode() == cGameModeLightning) && (tradeCount > 5))
-		tradeCount = 5; 
-		vilPop = vilPop - tradeCount;     // Vils = total-trade
-	}
-	
+        tradeCount = 5; 
+        vilPop = vilPop - tradeCount;     // Vils = total-trade
+    }
+    
     if ((vilPop < 15) && (kbGetAge() > cAge1))
-	vilPop = 15;
+    vilPop = 15;
     
     if (cMyCulture == cCultureAtlantean)
-	vilPop = vilPop / 3;
-	
+    vilPop = vilPop / 3;
+    
     // Brutal hack to make Lightning work.
     if (aiGetGameMode() == cGameModeLightning)
     {     // Make sure we don't try to overtrain villagers
         int lightningLimit = 25;      // Greek/Egyptian;
         if (cMyCulture == cCultureNorse)
-		lightningLimit = 20;
+        lightningLimit = 20;
         else if (cMyCulture == cCultureAtlantean)
-		lightningLimit = 6;
+        lightningLimit = 6;
         if (vilPop > lightningLimit)
-		vilPop = lightningLimit;
-	}
-	
+        vilPop = lightningLimit;
+    }
+    
     //Update the number of vils to maintain.
-	int gathererPUID=kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionGatherer,0);
-	if ((kbCanAffordUnit(gathererPUID, cEconomyEscrowID) == true) && (kbUnitCount(cMyID, gathererPUID, cUnitStateAlive) < vilPop * 0.8) && 
-	(kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAlive) > 0) && (kbGetPopCap() != kbGetPop()) && (AgingUp() == false))
-	{
-		static int LastCount = 0;
-		int CurrentTrained = aiPlanGetNumberVariableValues(gCivPopPlanID, cTrainPlanTrainedUnitID);
-		if ((CurrentTrained > LastCount) || (kbUnitCount(cMyID, gathererPUID, cUnitStateBuilding) > 0))
-		{
-			FailedToTrain = 0;
-			LastCount = CurrentTrained;
-		}
-		else if (CurrentTrained == LastCount)
-		{
-			FailedToTrain = FailedToTrain+1;
-		}
-		if (FailedToTrain >= 4)
-		{
-			aiPlanDestroy(gCivPopPlanID);
-			FailedToTrain = 0;
-			LastCount = 0;
-			createCivPopPlan();
-		}
-	}
+    int gathererPUID=kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionGatherer,0);
+    if ((kbCanAffordUnit(gathererPUID, cEconomyEscrowID) == true) && (kbUnitCount(cMyID, gathererPUID, cUnitStateAlive) < vilPop * 0.8) && 
+    (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAlive) > 0) && (kbGetPopCap() != kbGetPop()) && (AgingUp() == false))
+    {
+        static int LastCount = 0;
+        int CurrentTrained = aiPlanGetNumberVariableValues(gCivPopPlanID, cTrainPlanTrainedUnitID);
+        if ((CurrentTrained > LastCount) || (kbUnitCount(cMyID, gathererPUID, cUnitStateBuilding) > 0))
+        {
+            FailedToTrain = 0;
+            LastCount = CurrentTrained;
+        }
+        else if (CurrentTrained == LastCount)
+        {
+            FailedToTrain = FailedToTrain+1;
+        }
+        if (FailedToTrain >= 4)
+        {
+            aiPlanDestroy(gCivPopPlanID);
+            FailedToTrain = 0;
+            LastCount = 0;
+            createCivPopPlan();
+        }
+    }
     aiPlanSetVariableInt(gCivPopPlanID, cTrainPlanNumberToMaintain, 0, vilPop);
-	if (gSomeData != -1)
-	aiPlanSetUserVariableInt(gSomeData, 7, 0 , vilPop);
+    if (gSomeData != -1)
+    aiPlanSetUserVariableInt(gSomeData, 7, 0 , vilPop);
 }
 
 //==============================================================================
@@ -846,157 +846,157 @@ rule updateEMAllAges
 minInterval 12 //starts in cAge1
 active
 {
-	int civPopTarget=-1;
-	int milPopTarget=-1;
+    int civPopTarget=-1;
+    int milPopTarget=-1;
     static int ageStartTime3 = -1;
     static int ageStartTime4 = -1;		
     float econPercent = 1.0;     // Econ priority rating, range 0..1
     float econEscrow = 1.0;      // Economy's share of non-root escrow, range 0..1
-	updateGlutRatio();
-	
-	if ((RiverSLowBoar == true) && (kbGetAge() < cAge2) && (aiGetWorldDifficulty() < cDifficultyNightmare))
-	{
+    updateGlutRatio();
+    
+    if ((RiverSLowBoar == true) && (kbGetAge() < cAge2) && (aiGetWorldDifficulty() < cDifficultyNightmare))
+    {
         if (RetardedLowBoarSpawn = true)
-		civPopTarget = 13;	
-		else
-		civPopTarget = 18;
-		milPopTarget = 60;
-	}	
-	else if ((kbGetAge() < cAge2) && (aiGetWorldDifficulty() >= cDifficultyModerate))
-	{
-		civPopTarget = 25;
-		milPopTarget = 60;
-	}
+        civPopTarget = 13;	
+        else
+        civPopTarget = 18;
+        milPopTarget = 60;
+    }	
+    else if ((kbGetAge() < cAge2) && (aiGetWorldDifficulty() >= cDifficultyModerate))
+    {
+        civPopTarget = 25;
+        milPopTarget = 60;
+    }
     else if (aiGetWorldDifficulty() <= cDifficultyModerate)
-	{
-		if (aiGetWorldDifficulty() == cDifficultyEasy)
-		{
-			civPopTarget = 18;
-			milPopTarget = 32;
-		}
-		else
-		{
-		    civPopTarget = 34; 
-	        if (aiGetGameMode() == cGameModeLightning)
-		    civPopTarget = 15;
-	        milPopTarget = 50;
-		}
-	}
-	else
-	{
-		civPopTarget = 61;
-		if (getSoftPopCap() > 115)
-		civPopTarget = civPopTarget + 0.2 * (getSoftPopCap()-115);  // Plus 20% over 115		
-		if (gGlutRatio > 1.0)
-		civPopTarget = civPopTarget / gGlutRatio;
-		if ((aiGetGameMode() == cGameModeLightning) && (civPopTarget > 35))  
-		civPopTarget = 35;
-	    if (civPopTarget > 80)
-		civPopTarget = 80;
+    {
+        if (aiGetWorldDifficulty() == cDifficultyEasy)
+        {
+            civPopTarget = 18;
+            milPopTarget = 32;
+        }
+        else
+        {
+            civPopTarget = 34; 
+            if (aiGetGameMode() == cGameModeLightning)
+            civPopTarget = 15;
+            milPopTarget = 50;
+        }
+    }
+    else
+    {
+        civPopTarget = 61;
+        if (getSoftPopCap() > 115)
+        civPopTarget = civPopTarget + 0.2 * (getSoftPopCap()-115);  // Plus 20% over 115		
+        if (gGlutRatio > 1.0)
+        civPopTarget = civPopTarget / gGlutRatio;
+        if ((aiGetGameMode() == cGameModeLightning) && (civPopTarget > 35))  
+        civPopTarget = 35;
+        if (civPopTarget > 80)
+        civPopTarget = 80;
         if (civPopTarget < 20)
-		civPopTarget = 20;		
-	    milPopTarget = getSoftPopCap() - civPopTarget;
-		if ((kbGetAge() == cAge3) && (ageStartTime3 == -1))
-		ageStartTime3 = xsGetTime();
-		if ((kbGetAge() == cAge4) && (ageStartTime4 == -1))
-		ageStartTime4 = xsGetTime();		
-	}
-	
+        civPopTarget = 20;		
+        milPopTarget = getSoftPopCap() - civPopTarget;
+        if ((kbGetAge() == cAge3) && (ageStartTime3 == -1))
+        ageStartTime3 = xsGetTime();
+        if ((kbGetAge() == cAge4) && (ageStartTime4 == -1))
+        ageStartTime4 = xsGetTime();		
+    }
+    
     if (kbGetAge() > cAge1)
-	{
-		if ((aiGetWorldDifficulty() >= cDifficultyHard) && (kbGetAge() >= cAge3))
-		{
-		    kbUnitPickSetMinimumPop(gLateUPID, milPopTarget*.5);
+    {
+        if ((aiGetWorldDifficulty() >= cDifficultyHard) && (kbGetAge() >= cAge3))
+        {
+            kbUnitPickSetMinimumPop(gLateUPID, milPopTarget*.5);
             kbUnitPickSetMaximumPop(gLateUPID, milPopTarget*.75);
-		}
-		
-		if (kbGetAge() == cAge2)
-		{
-			econPercent = 0.5;
-			econEscrow = 0.5; 
-		}
-		else if (kbGetAge() == cAge3)
-		{
-			econPercent = 0.3;
-			econEscrow = 0.3; 
-		}
-		else
-		{
-			econPercent = 0.15;
-			econEscrow = 0.15; 
-		}
-		
-		if ((kbGetAge() >= cAge3) || (kbGetAge() >= cAge2) && (cMyCiv == cCivNuwa))
-		{
-			int BonusCaravan = 0;
-			if (gGlutRatio < 1.0)
-			BonusCaravan = BonusCaravan + 4;
-			
-			if ((aiGetWorldDifficulty() >= cDifficultyHard) && (aiGetGameMode() != cGameModeLightning))
-			{
-				int numWoodPlans = aiPlanGetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumWoodPlans, 0);
-				if (numWoodPlans < 1)
-				BonusCaravan = BonusCaravan + 4;
-				int numGoldPlans = aiPlanGetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumGoldPlans, 0);
-				if (numGoldPlans < 1)
-				BonusCaravan = BonusCaravan + 4;
-			}
-			
-			if (gGlutRatio >= 1.15)
-			{
+        }
+        
+        if (kbGetAge() == cAge2)
+        {
+            econPercent = 0.5;
+            econEscrow = 0.5; 
+        }
+        else if (kbGetAge() == cAge3)
+        {
+            econPercent = 0.3;
+            econEscrow = 0.3; 
+        }
+        else
+        {
+            econPercent = 0.15;
+            econEscrow = 0.15; 
+        }
+        
+        if ((kbGetAge() >= cAge3) || (kbGetAge() >= cAge2) && (cMyCiv == cCivNuwa))
+        {
+            int BonusCaravan = 0;
+            if (gGlutRatio < 1.0)
+            BonusCaravan = BonusCaravan + 4;
+            
+            if ((aiGetWorldDifficulty() >= cDifficultyHard) && (aiGetGameMode() != cGameModeLightning))
+            {
+                int numWoodPlans = aiPlanGetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumWoodPlans, 0);
+                if (numWoodPlans < 1)
+                BonusCaravan = BonusCaravan + 4;
+                int numGoldPlans = aiPlanGetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumGoldPlans, 0);
+                if (numGoldPlans < 1)
+                BonusCaravan = BonusCaravan + 4;
+            }
+            
+            if (gGlutRatio >= 1.15)
+            {
                 float Increase = 0.0;
-	            if (gGlutRatio >= 1.15)
-	            Increase = gGlutRatio -1.15;
-			    Increase = Increase * 20;	
-			    gMaxTradeCarts = defWantedCaravans+BonusCaravan-Increase;
-				if (gMaxTradeCarts <= 0)
-				gMaxTradeCarts = 0;		
-			}
-			else
-			gMaxTradeCarts = defWantedCaravans + BonusCaravan;
-		    if (gSomeData != -1)
-			aiPlanSetUserVariableInt(gSomeData, 9, 0 , gMaxTradeCarts);
-		}		
-		float econAdjust = -.5 * cvMilitaryEconSlider;
-		float econShortage = aiGetAvailableEconomyPop();
-		float econTarget = aiGetEconomyPop();
-		econShortage = econShortage / econTarget;
-		econAdjust = econAdjust + econShortage;
-		if (econAdjust > 1.0)
-		econAdjust = 1.0;
-		if (econAdjust < -1.0)
-		econAdjust = -1.0;
-		
-		econPercent = adjustSigmoid(econPercent, econAdjust, 0.0, 1.0);
-		econEscrow = econPercent;	
-		
-		if ((xsGetTime() > 10*60*1000) && (kbGetAge() == cAge2) && (AgingUp() == false) || 
-		(xsGetTime() > 22*60*1000) && (AgingUp() == false) && (xsGetTime() - ageStartTime3 > 6*60*1000) && (kbGetAge() == cAge3)
-		|| (kbGetAge() == cAge3) && (AgingUp() == false) && (xsGetTime() - ageStartTime3 > 3*60*1000) && (ShouldIAgeUp() == true) 
-		|| (TitanAvailable == true) && (kbGetAge() == cAge4) && (AgingUp() == false) && (gTransportMap == false) && (xsGetTime() - ageStartTime4 > 3*60*1000))
-		{
-			if (econEscrow < 0.35)
-			econEscrow = 0.35;
-		}	
-		if (econEscrow < 0.15)
-		econEscrow = 0.15;
-	}
-	//Update all the econ stuff
-	if ((kbGetAge() >= cAge2) && ((aiGetWorldDifficulty() >= cDifficultyHard)) && (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding) < 1))
-	{	
-	    int ModdedCivPop = 0;
-		float Vills = kbUnitCount(cMyID,cUnitTypeAbstractVillager, cUnitStateAlive);
+                if (gGlutRatio >= 1.15)
+                Increase = gGlutRatio -1.15;
+                Increase = Increase * 20;	
+                gMaxTradeCarts = defWantedCaravans+BonusCaravan-Increase;
+                if (gMaxTradeCarts <= 0)
+                gMaxTradeCarts = 0;		
+            }
+            else
+            gMaxTradeCarts = defWantedCaravans + BonusCaravan;
+            if (gSomeData != -1)
+            aiPlanSetUserVariableInt(gSomeData, 9, 0 , gMaxTradeCarts);
+        }		
+        float econAdjust = -.5 * cvMilitaryEconSlider;
+        float econShortage = aiGetAvailableEconomyPop();
+        float econTarget = aiGetEconomyPop();
+        econShortage = econShortage / econTarget;
+        econAdjust = econAdjust + econShortage;
+        if (econAdjust > 1.0)
+        econAdjust = 1.0;
+        if (econAdjust < -1.0)
+        econAdjust = -1.0;
+        
+        econPercent = adjustSigmoid(econPercent, econAdjust, 0.0, 1.0);
+        econEscrow = econPercent;	
+        
+        if ((xsGetTime() > 10*60*1000) && (kbGetAge() == cAge2) && (AgingUp() == false) || 
+        (xsGetTime() > 22*60*1000) && (AgingUp() == false) && (xsGetTime() - ageStartTime3 > 6*60*1000) && (kbGetAge() == cAge3)
+        || (kbGetAge() == cAge3) && (AgingUp() == false) && (xsGetTime() - ageStartTime3 > 3*60*1000) && (ShouldIAgeUp() == true) 
+        || (TitanAvailable == true) && (kbGetAge() == cAge4) && (AgingUp() == false) && (gTransportMap == false) && (xsGetTime() - ageStartTime4 > 3*60*1000))
+        {
+            if (econEscrow < 0.35)
+            econEscrow = 0.35;
+        }	
+        if (econEscrow < 0.15)
+        econEscrow = 0.15;
+    }
+    //Update all the econ stuff
+    if ((kbGetAge() >= cAge2) && ((aiGetWorldDifficulty() >= cDifficultyHard)) && (kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding) < 1))
+    {	
+        int ModdedCivPop = 0;
+        float Vills = kbUnitCount(cMyID,cUnitTypeAbstractVillager, cUnitStateAlive);
         if (cMyCulture == cCultureAtlantean)
-	    Vills = Vills * 3;
-	    int numTradeUnits = kbUnitCount(cMyID, cUnitTypeAbstractTradeUnit, cUnitStateAlive);
-	    int FishShips = kbUnitCount(cMyID, cUnitTypeUtilityShip, cUnitStateAlive);
-		ModdedCivPop = Vills + FishShips + numTradeUnits;
-		civPopTarget = ModdedCivPop;
-		if (civPopTarget < 25)
-		civPopTarget = 25;
-	    milPopTarget = getSoftPopCap() - civPopTarget;
-	}
-	updateEM(civPopTarget, milPopTarget, econPercent, 0.20, econEscrow, econEscrow, econEscrow, econEscrow);
+        Vills = Vills * 3;
+        int numTradeUnits = kbUnitCount(cMyID, cUnitTypeAbstractTradeUnit, cUnitStateAlive);
+        int FishShips = kbUnitCount(cMyID, cUnitTypeUtilityShip, cUnitStateAlive);
+        ModdedCivPop = Vills + FishShips + numTradeUnits;
+        civPopTarget = ModdedCivPop;
+        if (civPopTarget < 25)
+        civPopTarget = 25;
+        milPopTarget = getSoftPopCap() - civPopTarget;
+    }
+    updateEM(civPopTarget, milPopTarget, econPercent, 0.20, econEscrow, econEscrow, econEscrow, econEscrow);
 }
 void updateGlutRatio(void)
 {
@@ -1006,34 +1006,34 @@ void updateGlutRatio(void)
 
     gGlutRatio = 100.0;     // ludicrously high
     
-	if ( (goldSupply/gGoldForecast) < gGlutRatio )
-	gGlutRatio = goldSupply/gGoldForecast;
+    if ( (goldSupply/gGoldForecast) < gGlutRatio )
+    gGlutRatio = goldSupply/gGoldForecast;
     if ( (woodSupply/gWoodForecast) < gGlutRatio )
-	gGlutRatio = woodSupply/gWoodForecast;
+    gGlutRatio = woodSupply/gWoodForecast;
     if ( (foodSupply/gFoodForecast) < gGlutRatio )
-	gGlutRatio = foodSupply/gFoodForecast;
+    gGlutRatio = foodSupply/gFoodForecast;
     gGlutRatio = gGlutRatio * 1.5; // Double it, i.e. start reducing civ pop when all resources are > 50% of forecast
 
-	if (gGlutRatio <= 0.0)
-	gGlutRatio = 0.0;
+    if (gGlutRatio <= 0.0)
+    gGlutRatio = 0.0;
 
     gFoodGlutRatio = foodSupply/gFoodForecast;
-	gFoodGlutRatio = gFoodGlutRatio * 1.5;
-	gWoodGlutRatio = woodSupply/gWoodForecast;
-	gWoodGlutRatio = gWoodGlutRatio * 1.5;
-	gGoldGlutRatio = goldSupply/gGoldForecast;
-	gGoldGlutRatio = gGoldGlutRatio * 1.5;
-	
-	if ((kbGetAge() < cAge4) || (TitanAvailable == true) && (kbGetTechStatus(cTechSecretsoftheTitans) < cTechStatusResearching) && (gTransportMap == false))
-	gGlutRatio = 0.0;
+    gFoodGlutRatio = gFoodGlutRatio * 1.5;
+    gWoodGlutRatio = woodSupply/gWoodForecast;
+    gWoodGlutRatio = gWoodGlutRatio * 1.5;
+    gGoldGlutRatio = goldSupply/gGoldForecast;
+    gGoldGlutRatio = gGoldGlutRatio * 1.5;
+    
+    if ((kbGetAge() < cAge4) || (TitanAvailable == true) && (kbGetTechStatus(cTechSecretsoftheTitans) < cTechStatusResearching) && (gTransportMap == false))
+    gGlutRatio = 0.0;
 
     if (gSomeData != -1)
-	{
-	    aiPlanSetUserVariableFloat(gSomeData, 10, 0, gGlutRatio);
-		aiPlanSetUserVariableFloat(gSomeData, 11, 0, gFoodGlutRatio);
-		aiPlanSetUserVariableFloat(gSomeData, 12, 0, gGoldGlutRatio);
-		aiPlanSetUserVariableFloat(gSomeData, 13, 0, gWoodGlutRatio);
-	}
+    {
+        aiPlanSetUserVariableFloat(gSomeData, 10, 0, gGlutRatio);
+        aiPlanSetUserVariableFloat(gSomeData, 11, 0, gFoodGlutRatio);
+        aiPlanSetUserVariableFloat(gSomeData, 12, 0, gGoldGlutRatio);
+        aiPlanSetUserVariableFloat(gSomeData, 13, 0, gWoodGlutRatio);
+    }
 }
 //==============================================================================
 rule updatePrices   // This rule constantly compares actual supply vs. forecast, updates AICost // values (internal resource prices), and buys/sells at the market as appropriate
@@ -1041,50 +1041,50 @@ minInterval 6
 active
 {
     // check for valid forecasts, exit if not ready
-	updateGlutRatio();
+    updateGlutRatio();
     if (((gGoldForecast + gWoodForecast + gFoodForecast) < 100))
-	return; 
+    return; 
     
     xsSetRuleMinIntervalSelf(6);								
-	static int lastRequestTime = 0;	
+    static int lastRequestTime = 0;	
     float scaleFactor = 5.0;      // Higher values make prices more volatile
     float goldStatus = 0.0;
     float woodStatus = 0.0;
     float foodStatus = 0.0;
     float minForecast = 200.0 * (1 + kbGetAge());	// 200, 400, 600, 800 in ages 1-5, prevents small amount from looking large if forecast is very low
     if (gGoldForecast > minForecast)
-	goldStatus = scaleFactor * kbResourceGet(cResourceGold)/gGoldForecast;
+    goldStatus = scaleFactor * kbResourceGet(cResourceGold)/gGoldForecast;
     else
-	goldStatus = scaleFactor * kbResourceGet(cResourceGold)/minForecast;
+    goldStatus = scaleFactor * kbResourceGet(cResourceGold)/minForecast;
     if (gFoodForecast > minForecast)
-	foodStatus = scaleFactor * kbResourceGet(cResourceFood)/gFoodForecast;
+    foodStatus = scaleFactor * kbResourceGet(cResourceFood)/gFoodForecast;
     else
-	foodStatus = scaleFactor * kbResourceGet(cResourceFood)/minForecast;
+    foodStatus = scaleFactor * kbResourceGet(cResourceFood)/minForecast;
     if (gWoodForecast > minForecast)
-	woodStatus = scaleFactor * kbResourceGet(cResourceWood)/gWoodForecast;
+    woodStatus = scaleFactor * kbResourceGet(cResourceWood)/gWoodForecast;
     else
-	woodStatus = scaleFactor * kbResourceGet(cResourceWood)/minForecast;
-	
+    woodStatus = scaleFactor * kbResourceGet(cResourceWood)/minForecast;
+    
     // Status now equals inventory/forecast
     // Calculate value rate of wood:gold and food:gold.  1.0 means they're of the same status, 2.0 means 
     // that the resource is one forecast more scarce, 0.5 means one forecast more plentiful, i.e. lower value.
     float woodRate = (1.0 + goldStatus)/(1.0 + woodStatus);
     float foodRate = (1.0 + goldStatus)/(1.0 + foodStatus);
-	
+    
     // The rates are now the instantaneous price for each resource.  Set the long-term prices by averaging this in
     // at a 5% weight.
     float cost = 0.0;
-	
+    
     // wood
     cost = kbGetAICostWeight(cResourceWood);
     cost = (cost * 0.95) + (woodRate * .05);
     kbSetAICostWeight(cResourceWood, cost);
-	
+    
     // food
     cost = kbGetAICostWeight(cResourceFood);
     cost = (cost * 0.95) + (foodRate * .05);
     kbSetAICostWeight(cResourceFood, cost);
-	
+    
     // Gold
     kbSetAICostWeight(cResourceGold, 1.00);	// gold always 1.0, others relative to gold
     
@@ -1098,11 +1098,11 @@ active
     for (i = 0; < 3)
     {
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanResourceCostWeight, i, kbGetAICostWeight(i));
-	}
-	
-	if ((aiGetGameMode() == cGameModeDeathmatch) && (xsGetTime() < 11*60*1000))
-	return;
-	
+    }
+    
+    if ((aiGetGameMode() == cGameModeDeathmatch) && (xsGetTime() < 11*60*1000))
+    return;
+    
     //Compare that to the market price.  Buy if
     // the market price is lower and we have at least 
     // 1/3 forecast of gold.  Sell if market price is higher and
@@ -1111,63 +1111,63 @@ active
     {
         float reserve = 500.0;
         if (kbGetAge() > cAge3)
-		reserve = 800.0;
-		
+        reserve = 800.0;
+        
         if ( (goldStatus > 0.33) && (kbResourceGet(cResourceGold) > reserve) )	// We have some reserve of gold, OK to buy
         {
             if (((aiGetMarketBuyCost(cResourceFood)/100.0) < kbGetAICostWeight(cResourceFood)) && (kbResourceGet(cResourceFood) < 600))	// Market cheaper than our rate?
             {
                 aiBuyResourceOnMarket(cResourceFood);
-			}
+            }
             if (((aiGetMarketBuyCost(cResourceWood)/100.0) < kbGetAICostWeight(cResourceWood)) && (kbResourceGet(cResourceWood) < 600))	// Market cheaper than our rate?
             {
                 aiBuyResourceOnMarket(cResourceWood);
-			}
-		}
+            }
+        }
         
         if ((woodStatus > 0.33) && (kbResourceGet(cResourceWood) > reserve))	// We have some reserve of wood, OK to sell
         {
             if (((aiGetMarketSellCost(cResourceWood)/100.0) > kbGetAICostWeight(cResourceWood)) && (kbResourceGet(cResourceGold) < 600))	// Market rate higher??
             {
                 aiSellResourceOnMarket(cResourceWood);
-			}
-		}
+            }
+        }
         
         if ((foodStatus > 0.33) && (kbResourceGet(cResourceFood) > reserve))	// We have some reserve of food, OK to sell
         {
             if (((aiGetMarketSellCost(cResourceFood)/100.0) > kbGetAICostWeight(cResourceFood)) && (kbResourceGet(cResourceGold) < 600))	// Market rate higher??
             {
                 aiSellResourceOnMarket(cResourceFood);
-			}
-		}
-		if (kbResourceGet(cResourceGold) > 1300)	// We have a lot of gold, OK to buy
+            }
+        }
+        if (kbResourceGet(cResourceGold) > 1300)	// We have a lot of gold, OK to buy
         {
             if (kbResourceGet(cResourceFood) < 1200)
             {
                 if (kbResourceGet(cResourceGold) > 1800)
                 {
                     aiBuyResourceOnMarket(cResourceFood);
-					xsSetRuleMinIntervalSelf(1);
-				}
+                    xsSetRuleMinIntervalSelf(1);
+                }
                 else
                 {
                     aiBuyResourceOnMarket(cResourceFood);
-				}
-			}
+                }
+            }
             if (kbResourceGet(cResourceWood) < 800)
             {
                 if (kbResourceGet(cResourceGold) > 1800)
                 {
                     aiBuyResourceOnMarket(cResourceWood);
-					xsSetRuleMinIntervalSelf(1);
-				}
+                    xsSetRuleMinIntervalSelf(1);
+                }
                 else
                 {
                     aiBuyResourceOnMarket(cResourceWood);
-				}
-			}
-		}
-		
+                }
+            }
+        }
+        
         if (kbResourceGet(cResourceFood) > 1400)	// We have a lot of food, OK to sell
         {
             if (kbResourceGet(cResourceGold) < 1200)
@@ -1175,74 +1175,74 @@ active
                 if (kbResourceGet(cResourceFood) > 1800)
                 {
                     aiSellResourceOnMarket(cResourceFood);
-					xsSetRuleMinIntervalSelf(1);
-				}				
+                    xsSetRuleMinIntervalSelf(1);
+                }				
                 else
                 {
                     aiSellResourceOnMarket(cResourceFood);
-				}
-			}
-		}
-		
-		// Special Treatment for resource equalizing
-		if (gFoodGlutRatio > 1.50)
-		{
-			if (gGoldGlutRatio < 1.50)
-			{
-				aiSellResourceOnMarket(cResourceFood);
-				xsSetRuleMinIntervalSelf(1);
-				
-			}
-		}
-		if (gWoodGlutRatio > 1.50)
-		{
-			if (gGoldGlutRatio < 1.50)
-			{
-				aiSellResourceOnMarket(cResourceWood);
-				xsSetRuleMinIntervalSelf(1);
-				
-			}
-		}
-		if (gGoldGlutRatio > 1.50)
-		{
-			if (gFoodGlutRatio < 1.50)
-			{
-				aiBuyResourceOnMarket(cResourceFood);
-				xsSetRuleMinIntervalSelf(1);
-			}
-			if (gWoodGlutRatio < 1.50)
-			{
-				aiBuyResourceOnMarket(cResourceWood);
-				xsSetRuleMinIntervalSelf(1);
-			}		
-		}
-	}
-	
+                }
+            }
+        }
+        
+        // Special Treatment for resource equalizing
+        if (gFoodGlutRatio > 1.50)
+        {
+            if (gGoldGlutRatio < 1.50)
+            {
+                aiSellResourceOnMarket(cResourceFood);
+                xsSetRuleMinIntervalSelf(1);
+                
+            }
+        }
+        if (gWoodGlutRatio > 1.50)
+        {
+            if (gGoldGlutRatio < 1.50)
+            {
+                aiSellResourceOnMarket(cResourceWood);
+                xsSetRuleMinIntervalSelf(1);
+                
+            }
+        }
+        if (gGoldGlutRatio > 1.50)
+        {
+            if (gFoodGlutRatio < 1.50)
+            {
+                aiBuyResourceOnMarket(cResourceFood);
+                xsSetRuleMinIntervalSelf(1);
+            }
+            if (gWoodGlutRatio < 1.50)
+            {
+                aiBuyResourceOnMarket(cResourceWood);
+                xsSetRuleMinIntervalSelf(1);
+            }		
+        }
+    }
+    
     if ((AoModAllies == true) && (kbGetAge() > cAge1))
     { 
-		if (((xsGetTime() - lastRequestTime) > 300000) && ((xsGetTime() - gLastSentTime) > 120000))
-		{
-			float totalResources = kbResourceGet(cResourceFood) + kbResourceGet(cResourceWood) + kbResourceGet(cResourceGold);
-			if (totalResources > 1000.0)
-			{
-				if ((kbResourceGet(cResourceFood) < (totalResources / 10.0) && (kbResourceGet(cResourceFood) < 3500)))
-				{
-					MessageRel(cPlayerRelationAlly, RequestFood, cLowPriority);
-					lastRequestTime = xsGetTime();
-				}
-				if ((kbResourceGet(cResourceGold) < (totalResources / 10.0) && (kbResourceGet(cResourceGold) < 3500)))
-				{
-					MessageRel(cPlayerRelationAlly, RequestGold, cLowPriority);
-					lastRequestTime = xsGetTime();
-				}
-				if ((kbResourceGet(cResourceWood) < (totalResources / 10.0) && (kbResourceGet(cResourceWood) < 3500)))
-				{
-					MessageRel(cPlayerRelationAlly, RequestWood, cLowPriority);
-					lastRequestTime = xsGetTime();
-				}
-			}
-		}
-	} 	
+        if (((xsGetTime() - lastRequestTime) > 300000) && ((xsGetTime() - gLastSentTime) > 120000))
+        {
+            float totalResources = kbResourceGet(cResourceFood) + kbResourceGet(cResourceWood) + kbResourceGet(cResourceGold);
+            if (totalResources > 1000.0)
+            {
+                if ((kbResourceGet(cResourceFood) < (totalResources / 10.0) && (kbResourceGet(cResourceFood) < 3500)))
+                {
+                    MessageRel(cPlayerRelationAlly, RequestFood, cLowPriority);
+                    lastRequestTime = xsGetTime();
+                }
+                if ((kbResourceGet(cResourceGold) < (totalResources / 10.0) && (kbResourceGet(cResourceGold) < 3500)))
+                {
+                    MessageRel(cPlayerRelationAlly, RequestGold, cLowPriority);
+                    lastRequestTime = xsGetTime();
+                }
+                if ((kbResourceGet(cResourceWood) < (totalResources / 10.0) && (kbResourceGet(cResourceWood) < 3500)))
+                {
+                    MessageRel(cPlayerRelationAlly, RequestWood, cLowPriority);
+                    lastRequestTime = xsGetTime();
+                }
+            }
+        }
+    } 	
 }
 //==============================================================================
 void updateGathererRatios(void) //Check the forecast variables, check inventory, set assignments
@@ -1251,90 +1251,90 @@ void updateGathererRatios(void) //Check the forecast variables, check inventory,
     float woodSupply = kbResourceGet(cResourceWood);
     float foodSupply = kbResourceGet(cResourceFood);
     gFoodForecast = gFoodForecast * 1.2;
-	
+    
     float goldShortage = gGoldForecast - goldSupply;
     if (goldShortage < 0)
-	goldShortage = 0;
+    goldShortage = 0;
     float woodShortage = gWoodForecast - woodSupply;
     if (woodShortage < 0)
-	woodShortage = 0;
+    woodShortage = 0;
     float foodShortage = gFoodForecast - foodSupply;
     if (foodShortage < 0)
-	foodShortage = 0;
-	
+    foodShortage = 0;
+    
     updateGlutRatio();
     float totalShortage = goldShortage + woodShortage + foodShortage;
     if (totalShortage < 1)
-	totalShortage = 1;
-	
+    totalShortage = 1;
+    
     float worstShortageRatio = goldShortage/(gGoldForecast+1);
     if ( (woodShortage/(gWoodForecast+1)) > worstShortageRatio)
-	worstShortageRatio = woodShortage/(gWoodForecast+1);
+    worstShortageRatio = woodShortage/(gWoodForecast+1);
     if ( (foodShortage/(gFoodForecast+1)) > worstShortageRatio)
-	worstShortageRatio = foodShortage/(gFoodForecast+1);
-	
-	
+    worstShortageRatio = foodShortage/(gFoodForecast+1);
+    
+    
     float totalForecast = gGoldForecast + gWoodForecast + gFoodForecast;
     if (totalForecast < 1)
-	totalForecast = 1;	// Avoid div by 0.
-	
+    totalForecast = 1;	// Avoid div by 0.
+    
     float numGatherers = kbUnitCount(cMyID,cUnitTypeAbstractVillager, cUnitStateAlive);
     if (cMyCulture == cCultureAtlantean)
-	numGatherers = numGatherers * 3;    // Account for pop slots
-	
+    numGatherers = numGatherers * 3;    // Account for pop slots
+    
     float numTradeCarts = kbUnitCount(cMyID, cUnitTypeAbstractTradeUnit, cUnitStateAlive);
     float numFishBoats = kbUnitCount(cMyID,kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionFish, 0), cUnitStateAlive);
     if (numFishBoats >= 1)
-	numFishBoats = numFishBoats - 1; // Ignore scout
-	
+    numFishBoats = numFishBoats - 1; // Ignore scout
+    
     float civPopTotal = numGatherers + numTradeCarts + numFishBoats;
-	
+    
     int doomedID = -1;   // Who to kill...
-	if (civPopTotal > (aiGetEconomyPop() + 5))
-	{
-		bool Caravan = false;
-		if (numTradeCarts > gMaxTradeCarts) // Trade Unit
-		{
-			//find idle units first
-			doomedID = findUnit(cUnitTypeAbstractTradeUnit, cUnitStateAlive, cActionIdle, cMyID);
-			if (doomedID < 0)
-		    doomedID = findUnit(cUnitTypeAbstractTradeUnit);
-		}
-		else
-		{
-			//find idle units first
-			doomedID = findUnit(cUnitTypeAbstractVillager, cUnitStateAlive, cActionIdle, cMyID);
-			if (doomedID < 0)
-			doomedID = findUnit(cUnitTypeAbstractVillager);
-			if (doomedID != -1)
-			Caravan = true;
-		}
-		aiTaskUnitDelete(doomedID);
-		if (Caravan == true)
-		{
+    if (civPopTotal > (aiGetEconomyPop() + 5))
+    {
+        bool Caravan = false;
+        if (numTradeCarts > gMaxTradeCarts) // Trade Unit
+        {
+            //find idle units first
+            doomedID = findUnit(cUnitTypeAbstractTradeUnit, cUnitStateAlive, cActionIdle, cMyID);
+            if (doomedID < 0)
+            doomedID = findUnit(cUnitTypeAbstractTradeUnit);
+        }
+        else
+        {
+            //find idle units first
+            doomedID = findUnit(cUnitTypeAbstractVillager, cUnitStateAlive, cActionIdle, cMyID);
+            if (doomedID < 0)
+            doomedID = findUnit(cUnitTypeAbstractVillager);
+            if (doomedID != -1)
+            Caravan = true;
+        }
+        aiTaskUnitDelete(doomedID);
+        if (Caravan == true)
+        {
             civPopTotal = civPopTotal - 1;
-			numTradeCarts = numTradeCarts -1;
-		}
-		else
-		{
-	        if (cMyCulture == cCultureAtlantean)
-			{
-			    numGatherers = numGatherers - 3;
-			    civPopTotal = civPopTotal - 3;
-			}
-			else
-			{
-			    numGatherers = numGatherers - 1;
-			    civPopTotal = civPopTotal - 1;				
-			}
-		}
-	}
-	
+            numTradeCarts = numTradeCarts -1;
+        }
+        else
+        {
+            if (cMyCulture == cCultureAtlantean)
+            {
+                numGatherers = numGatherers - 3;
+                civPopTotal = civPopTotal - 3;
+            }
+            else
+            {
+                numGatherers = numGatherers - 1;
+                civPopTotal = civPopTotal - 1;				
+            }
+        }
+    }
+    
     // Figure out what percent of our total civ pop we want working on each resource.  To do that,
     // figure out what the percentages would be to match our shortages, and the percents to match
     // our forecast, and come up with a weighted average of the two.  That way, if we don't have a wood shortage
     // at the moment, but we do expect to keep using wood, we'll keep some villagers on wood.
-	
+    
     // This much (forecastWeight) of the allocation is based on forecast, the rest on shortages.
     // If the biggest shortage is nearly equal to the forecast (nothing on hand), let
     // the shortage dominate.  If the shortage is relatively small, let the
@@ -1343,178 +1343,178 @@ void updateGathererRatios(void) //Check the forecast variables, check inventory,
     float goldForecastRatio = gGoldForecast / totalForecast;
     float woodForecastRatio = gWoodForecast / totalForecast;
     float foodForecastRatio = gFoodForecast / totalForecast;
-	
+    
     float goldShortageRatio = 0.0;
     if (totalShortage > 0)
-	goldShortageRatio = goldShortage / totalShortage;
+    goldShortageRatio = goldShortage / totalShortage;
     float woodShortageRatio = 0.0;
     if (totalShortage > 0)
-	woodShortageRatio = woodShortage / totalShortage;
+    woodShortageRatio = woodShortage / totalShortage;
     float foodShortageRatio = 0.0;
     if (totalShortage > 0)
-	foodShortageRatio = foodShortage / totalShortage;
-	
+    foodShortageRatio = foodShortage / totalShortage;
+    
     float desiredGoldRatio = forecastWeight*goldForecastRatio + (1.0-forecastWeight)*goldShortageRatio;
     float desiredWoodRatio = forecastWeight*woodForecastRatio + (1.0-forecastWeight)*woodShortageRatio;
     float desiredFoodRatio = forecastWeight*foodForecastRatio + (1.0-forecastWeight)*foodShortageRatio;
-	
+    
     // We now have the desired ratios, which can be converted to total civilian units, but then need to be adjusted for trade
     // carts and fishing boats.
     float desiredGoldUnits = desiredGoldRatio * civPopTotal;
     float desiredWoodUnits = desiredWoodRatio * civPopTotal;
     float desiredFoodUnits = desiredFoodRatio * civPopTotal;
-	
+    
     float neededGoldGatherers = desiredGoldUnits - numTradeCarts;
     int mainBaseID = kbBaseGetMainID(cMyID);
     int numMainBaseGoldSites = kbGetNumberValidResources(mainBaseID, cResourceGold, cAIResourceSubTypeEasy);
     int numGoldBaseSites = 0;
     if ((gGoldBaseID >= 0) && (gGoldBaseID != mainBaseID))    // Count gold base if different
-	numGoldBaseSites = kbGetNumberValidResources(gGoldBaseID, cResourceGold, cAIResourceSubTypeEasy);
+    numGoldBaseSites = kbGetNumberValidResources(gGoldBaseID, cResourceGold, cAIResourceSubTypeEasy);
     int numGoldSites = numMainBaseGoldSites + numGoldBaseSites;
-	
-	float neededWoodGatherers = desiredWoodUnits;
-	
-	int numberMainBaseSites = kbGetNumberValidResources(mainBaseID, cResourceWood, cAIResourceSubTypeEasy);
-	int numWoodBaseSites  = 0;
+    
+    float neededWoodGatherers = desiredWoodUnits;
+    
+    int numberMainBaseSites = kbGetNumberValidResources(mainBaseID, cResourceWood, cAIResourceSubTypeEasy);
+    int numWoodBaseSites  = 0;
     if ((gWoodBaseID >= 0) && (gWoodBaseID != mainBaseID))
-	numWoodBaseSites = kbGetNumberValidResources(gWoodBaseID, cResourceWood, cAIResourceSubTypeEasy);
+    numWoodBaseSites = kbGetNumberValidResources(gWoodBaseID, cResourceWood, cAIResourceSubTypeEasy);
     int numWoodSites = numberMainBaseSites + numWoodBaseSites;
 
     float neededFoodGatherers = desiredFoodUnits - numFishBoats;
 
     int minFoodGatherers = 1.5 + numGatherers*0.25;
-	if (minFoodGatherers < 6)
-	minFoodGatherers = 6;
+    if (minFoodGatherers < 6)
+    minFoodGatherers = 6;
     if ((numFishBoats < 4) && (kbGetAge() > cAge2) && (numWoodSites < 1) || (numGoldSites < 1))
     minFoodGatherers = minFoodGatherers*2;	
-	if (aiGetWorldDifficulty() == cDifficultyEasy)
-	minFoodGatherers = minFoodGatherers / 2;	
+    if (aiGetWorldDifficulty() == cDifficultyEasy)
+    minFoodGatherers = minFoodGatherers / 2;	
     if (neededFoodGatherers < minFoodGatherers)
-	neededFoodGatherers = minFoodGatherers;
-	
+    neededFoodGatherers = minFoodGatherers;
+    
     if (neededGoldGatherers < 0)
-	neededGoldGatherers = 0;
+    neededGoldGatherers = 0;
     if (neededFoodGatherers < 0)
-	neededFoodGatherers = 0;
+    neededFoodGatherers = 0;
     if (neededWoodGatherers < 0)
-	neededWoodGatherers = 0;
-	
+    neededWoodGatherers = 0;
+    
     float totalNeededGatherers = neededGoldGatherers + neededFoodGatherers + neededWoodGatherers;
     // Note, this total may be different than the total gatherers, if the trade carts are more than needed, or if
     // the fishing boats supply more food than we need, so this number may be lower...and should be used as the basis
     // for assigning villager percentages.
-	
+    
     float goldAssignment = neededGoldGatherers / totalNeededGatherers;
     float woodAssignment = neededWoodGatherers / totalNeededGatherers;
     float foodAssignment = neededFoodGatherers / totalNeededGatherers;
     float lastGoldAssignment = aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceGold);
     float lastWoodAssignment = aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceWood);
     float lastFoodAssignment = aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood);
-	
-	if (kbGetAge() > cAge1)
-	{
-		if (neededGoldGatherers > 0)
-		{
-			if (goldAssignment > lastGoldAssignment)
-			{
-				goldAssignment = lastGoldAssignment + 0.03;
-				if (goldAssignment > 0.45)
+    
+    if (kbGetAge() > cAge1)
+    {
+        if (neededGoldGatherers > 0)
+        {
+            if (goldAssignment > lastGoldAssignment)
+            {
+                goldAssignment = lastGoldAssignment + 0.03;
+                if (goldAssignment > 0.45)
                 goldAssignment = 0.45;
-			}
-			else if (goldAssignment < lastGoldAssignment)
-			{
-				goldAssignment = lastGoldAssignment - 0.03;
-				if (goldAssignment < 0.05)
+            }
+            else if (goldAssignment < lastGoldAssignment)
+            {
+                goldAssignment = lastGoldAssignment - 0.03;
+                if (goldAssignment < 0.05)
                 goldAssignment = 0.05;
-			}
-		}
-		if (neededWoodGatherers > 0)
-		{
-			if (woodAssignment > lastWoodAssignment)
-			{
-				woodAssignment = lastWoodAssignment + 0.03;
-				if (woodAssignment > 0.45)
+            }
+        }
+        if (neededWoodGatherers > 0)
+        {
+            if (woodAssignment > lastWoodAssignment)
+            {
+                woodAssignment = lastWoodAssignment + 0.03;
+                if (woodAssignment > 0.45)
                 woodAssignment = 0.45;
-			}
-			else if (woodAssignment < lastWoodAssignment)
-			{
-				woodAssignment = lastWoodAssignment - 0.03;
-				if (woodAssignment < 0.05)
+            }
+            else if (woodAssignment < lastWoodAssignment)
+            {
+                woodAssignment = lastWoodAssignment - 0.03;
+                if (woodAssignment < 0.05)
                 woodAssignment = 0.05;
-			}
-		}
-		if (neededFoodGatherers > 0)
-		{
-			if (foodAssignment > lastFoodAssignment)
-			{
-				foodAssignment = lastFoodAssignment + 0.03;
-			}
-			else if (foodAssignment < lastFoodAssignment)
-			{
-				foodAssignment = lastFoodAssignment - 0.03;
-				if (foodAssignment < 0.25)
+            }
+        }
+        if (neededFoodGatherers > 0)
+        {
+            if (foodAssignment > lastFoodAssignment)
+            {
+                foodAssignment = lastFoodAssignment + 0.03;
+            }
+            else if (foodAssignment < lastFoodAssignment)
+            {
+                foodAssignment = lastFoodAssignment - 0.03;
+                if (foodAssignment < 0.25)
                 foodAssignment = 0.25;
-			}
-		}
-	}
-	//Test
+            }
+        }
+    }
+    //Test
     //if we lost a lot of villagers, keep them close to our settlements (=farming)
     int minVillagers = 14;
     if (cMyCulture == cCultureAtlantean)
-	minVillagers = 5;
+    minVillagers = 5;
     int numVillagers = kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive);
     if ((numVillagers <= minVillagers) && (kbGetAge() > cAge2) && (xsGetTime() > 16*60*1000))
     {
         goldAssignment = 0.05;
         woodAssignment = 0.05; 
         foodAssignment = 0.90;
-	}
-	//Test end
+    }
+    //Test end
     
-	aiSetResourceGathererPercentageWeight(cRGPScript, 1.0);
-	aiSetResourceGathererPercentageWeight(cRGPCost, 0.0);
-	aiSetResourceGathererPercentage(cResourceGold, goldAssignment, false, cRGPScript);
-	aiSetResourceGathererPercentage(cResourceWood, woodAssignment, false, cRGPScript);
-	aiSetResourceGathererPercentage(cResourceFood, foodAssignment, false, cRGPScript);
-	if ((cMyCulture == cCultureGreek) && (kbGetAge() > cAge1))
-	aiSetResourceGathererPercentage(cResourceFavor, 0.05, false, cRGPScript);
-	
-	aiNormalizeResourceGathererPercentages(cRGPScript);
+    aiSetResourceGathererPercentageWeight(cRGPScript, 1.0);
+    aiSetResourceGathererPercentageWeight(cRGPCost, 0.0);
+    aiSetResourceGathererPercentage(cResourceGold, goldAssignment, false, cRGPScript);
+    aiSetResourceGathererPercentage(cResourceWood, woodAssignment, false, cRGPScript);
+    aiSetResourceGathererPercentage(cResourceFood, foodAssignment, false, cRGPScript);
+    if ((cMyCulture == cCultureGreek) && (kbGetAge() > cAge1))
+    aiSetResourceGathererPercentage(cResourceFavor, 0.05, false, cRGPScript);
+    
+    aiNormalizeResourceGathererPercentages(cRGPScript);
     aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceGold, aiGetResourceGathererPercentage(cResourceGold, cRGPScript));
     aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceWood, aiGetResourceGathererPercentage(cResourceWood, cRGPScript));
     aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood, aiGetResourceGathererPercentage(cResourceFood, cRGPScript));
     aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFavor, aiGetResourceGathererPercentage(cResourceFavor, cRGPScript));
-	
-	if (gSomeData != -1)
+    
+    if (gSomeData != -1)
     { 
         int numTradeUnits = kbUnitCount(cMyID, cUnitTypeAbstractTradeUnit, cUnitStateAlive);
         aiPlanSetUserVariableInt(gSomeData, cResourceFood, 0 , gFoodForecast);
         aiPlanSetUserVariableInt(gSomeData, cResourceGold, 0 , gGoldForecast);
-		aiPlanSetUserVariableInt(gSomeData, cResourceWood, 0 , gWoodForecast);	
-		aiPlanSetUserVariableFloat(gSomeData, 4, 0 , aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood) * 100);
-	    aiPlanSetUserVariableFloat(gSomeData, 5, 0 , aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceGold) * 100);
-	    aiPlanSetUserVariableFloat(gSomeData, 6, 0 , aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceWood) * 100);
-		aiPlanSetUserVariableInt(gSomeData, 8, 0 , numTradeUnits);
-	}
+        aiPlanSetUserVariableInt(gSomeData, cResourceWood, 0 , gWoodForecast);	
+        aiPlanSetUserVariableFloat(gSomeData, 4, 0 , aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood) * 100);
+        aiPlanSetUserVariableFloat(gSomeData, 5, 0 , aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceGold) * 100);
+        aiPlanSetUserVariableFloat(gSomeData, 6, 0 , aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceWood) * 100);
+        aiPlanSetUserVariableInt(gSomeData, 8, 0 , numTradeUnits);
+    }
 }
 
 void addUnitForecast(int unitTypeID=-1, int qty=1)
 {
-	if (unitTypeID < 0)
-	return;
-	gGoldForecast = gGoldForecast + kbUnitCostPerResource(unitTypeID, cResourceGold)*qty;
-	gWoodForecast = gWoodForecast + kbUnitCostPerResource(unitTypeID, cResourceWood)*qty;
-	gFoodForecast = gFoodForecast + kbUnitCostPerResource(unitTypeID, cResourceFood)*qty;
+    if (unitTypeID < 0)
+    return;
+    gGoldForecast = gGoldForecast + kbUnitCostPerResource(unitTypeID, cResourceGold)*qty;
+    gWoodForecast = gWoodForecast + kbUnitCostPerResource(unitTypeID, cResourceWood)*qty;
+    gFoodForecast = gFoodForecast + kbUnitCostPerResource(unitTypeID, cResourceFood)*qty;
 }
 
 
 void addTechForecast(int techID=-1)
 {
-	if (techID < 0)
-	return;
-	gGoldForecast = gGoldForecast + kbTechCostPerResource(techID, cResourceGold);
-	gWoodForecast = gWoodForecast + kbTechCostPerResource(techID, cResourceWood);
-	gFoodForecast = gFoodForecast + kbTechCostPerResource(techID, cResourceFood);
+    if (techID < 0)
+    return;
+    gGoldForecast = gGoldForecast + kbTechCostPerResource(techID, cResourceGold);
+    gWoodForecast = gWoodForecast + kbTechCostPerResource(techID, cResourceWood);
+    gFoodForecast = gFoodForecast + kbTechCostPerResource(techID, cResourceFood);
 }
 //==============================================================================
 // setMilitaryUnitCostForecast
@@ -1524,179 +1524,179 @@ void addTechForecast(int techID=-1)
 //==============================================================================
 void setMilitaryUnitCostForecast(void)
 {
-	int upID = -1;  // ID of the unit picker to query
-	float totalAmount = 0.0;	// Total resources to be spent in near future
-	if (kbGetAge() == cAge2)
-	{
-		upID = gRushUPID;
-		totalAmount = 1200;
-	}
-	if (kbGetAge() == cAge3)
-	{
-		upID = gLateUPID;
-		totalAmount = 3000;
-	}
-	if (kbGetAge() >= cAge4)
-	{
-		upID = gLateUPID;
-		totalAmount = 5000;
-	}
-	
-	float goldCost = 0.0;
-	float woodCost = 0.0;
-	float foodCost = 0.0;
-	float totalCost = 0.0;
-	
-	int unitID = kbUnitPickGetResult( upID, 0); // Primary unit
-	float weight = 1.0;
-	int numUnits = kbUnitPickGetDesiredNumberUnitTypes(upID);
-	
-	if (numUnits == 2)
-	weight = 0.67; // 2/3 and 1/3
-	if (numUnits >= 3)
-	weight = 0.50; // 1/2, 1/3, 1/6
-	if (gSomeData != -1)
-	aiPlanSetUserVariableString(gSomeData, MainUnit, 0, ""+kbGetProtoUnitName(unitID));
-	
-	goldCost = kbUnitCostPerResource(unitID, cResourceGold);
-	woodCost = kbUnitCostPerResource(unitID, cResourceWood);
-	foodCost = kbUnitCostPerResource(unitID, cResourceFood);
-	totalCost = goldCost+woodCost+foodCost;
-	
-	gGoldForecast = gGoldForecast + goldCost * (totalAmount*weight/totalCost);
-	gWoodForecast = gWoodForecast + woodCost * (totalAmount*weight/totalCost);
-	gFoodForecast = gFoodForecast + foodCost * (totalAmount*weight/totalCost);
-	
-	if (numUnits > 1)
-	{  // Do second unit
-		unitID = kbUnitPickGetResult(upID, 1);
-		weight = 0.30;	// Second is 1/3 regardless 
-		if (gSomeData != -1)
-		aiPlanSetUserVariableString(gSomeData, SecondaryUnit, 0, ""+kbGetProtoUnitName(unitID));
-		goldCost = kbUnitCostPerResource(unitID, cResourceGold);
-		woodCost = kbUnitCostPerResource(unitID, cResourceWood);
-		foodCost = kbUnitCostPerResource(unitID, cResourceFood);
-		totalCost = goldCost+woodCost+foodCost;
-		
-		gGoldForecast = gGoldForecast + goldCost * (totalAmount*weight/totalCost);
-		gWoodForecast = gWoodForecast + woodCost * (totalAmount*weight/totalCost);
-		gFoodForecast = gFoodForecast + foodCost * (totalAmount*weight/totalCost);
-	}
-	
-	if (numUnits > 2)
-	{  // Do third unit
-		unitID = kbUnitPickGetResult(upID, 2);
-		weight = 0.20;   // Third unit, if used, is 1/6
-	    if (gSomeData != -1)
-	    aiPlanSetUserVariableString(gSomeData, ThirdUnit, 0, ""+kbGetProtoUnitName(unitID));			
-		goldCost = kbUnitCostPerResource(unitID, cResourceGold);
-		woodCost = kbUnitCostPerResource(unitID, cResourceWood);
-		foodCost = kbUnitCostPerResource(unitID, cResourceFood);
-		totalCost = goldCost+woodCost+foodCost;
-		
-		gGoldForecast = gGoldForecast + goldCost * (totalAmount*weight/totalCost);
-		gWoodForecast = gWoodForecast + woodCost * (totalAmount*weight/totalCost);
-		gFoodForecast = gFoodForecast + foodCost * (totalAmount*weight/totalCost);
-	}
+    int upID = -1;  // ID of the unit picker to query
+    float totalAmount = 0.0;	// Total resources to be spent in near future
+    if (kbGetAge() == cAge2)
+    {
+        upID = gRushUPID;
+        totalAmount = 1200;
+    }
+    if (kbGetAge() == cAge3)
+    {
+        upID = gLateUPID;
+        totalAmount = 3000;
+    }
+    if (kbGetAge() >= cAge4)
+    {
+        upID = gLateUPID;
+        totalAmount = 5000;
+    }
+    
+    float goldCost = 0.0;
+    float woodCost = 0.0;
+    float foodCost = 0.0;
+    float totalCost = 0.0;
+    
+    int unitID = kbUnitPickGetResult( upID, 0); // Primary unit
+    float weight = 1.0;
+    int numUnits = kbUnitPickGetDesiredNumberUnitTypes(upID);
+    
+    if (numUnits == 2)
+    weight = 0.67; // 2/3 and 1/3
+    if (numUnits >= 3)
+    weight = 0.50; // 1/2, 1/3, 1/6
+    if (gSomeData != -1)
+    aiPlanSetUserVariableString(gSomeData, MainUnit, 0, ""+kbGetProtoUnitName(unitID));
+    
+    goldCost = kbUnitCostPerResource(unitID, cResourceGold);
+    woodCost = kbUnitCostPerResource(unitID, cResourceWood);
+    foodCost = kbUnitCostPerResource(unitID, cResourceFood);
+    totalCost = goldCost+woodCost+foodCost;
+    
+    gGoldForecast = gGoldForecast + goldCost * (totalAmount*weight/totalCost);
+    gWoodForecast = gWoodForecast + woodCost * (totalAmount*weight/totalCost);
+    gFoodForecast = gFoodForecast + foodCost * (totalAmount*weight/totalCost);
+    
+    if (numUnits > 1)
+    {  // Do second unit
+        unitID = kbUnitPickGetResult(upID, 1);
+        weight = 0.30;	// Second is 1/3 regardless 
+        if (gSomeData != -1)
+        aiPlanSetUserVariableString(gSomeData, SecondaryUnit, 0, ""+kbGetProtoUnitName(unitID));
+        goldCost = kbUnitCostPerResource(unitID, cResourceGold);
+        woodCost = kbUnitCostPerResource(unitID, cResourceWood);
+        foodCost = kbUnitCostPerResource(unitID, cResourceFood);
+        totalCost = goldCost+woodCost+foodCost;
+        
+        gGoldForecast = gGoldForecast + goldCost * (totalAmount*weight/totalCost);
+        gWoodForecast = gWoodForecast + woodCost * (totalAmount*weight/totalCost);
+        gFoodForecast = gFoodForecast + foodCost * (totalAmount*weight/totalCost);
+    }
+    
+    if (numUnits > 2)
+    {  // Do third unit
+        unitID = kbUnitPickGetResult(upID, 2);
+        weight = 0.20;   // Third unit, if used, is 1/6
+        if (gSomeData != -1)
+        aiPlanSetUserVariableString(gSomeData, ThirdUnit, 0, ""+kbGetProtoUnitName(unitID));			
+        goldCost = kbUnitCostPerResource(unitID, cResourceGold);
+        woodCost = kbUnitCostPerResource(unitID, cResourceWood);
+        foodCost = kbUnitCostPerResource(unitID, cResourceFood);
+        totalCost = goldCost+woodCost+foodCost;
+        
+        gGoldForecast = gGoldForecast + goldCost * (totalAmount*weight/totalCost);
+        gWoodForecast = gWoodForecast + woodCost * (totalAmount*weight/totalCost);
+        gFoodForecast = gFoodForecast + foodCost * (totalAmount*weight/totalCost);
+    }
 }
 
 void AddGenForecastNeeds(void)
 {
-	
+    
     // Villagers & Farms   
-	int temp = aiPlanGetVariableInt(gCivPopPlanID, cTrainPlanNumberToMaintain, 0);  
-	temp = temp - kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive);
-	temp = temp + kbUnitCount(cMyID, cUnitTypeDwarf, cUnitStateAlive);  
+    int temp = aiPlanGetVariableInt(gCivPopPlanID, cTrainPlanNumberToMaintain, 0);  
+    temp = temp - kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive);
+    temp = temp + kbUnitCount(cMyID, cUnitTypeDwarf, cUnitStateAlive);  
     if (cMyCulture == cCultureAtlantean)
     {
-	   if(temp > 5)
-	   temp = 5; 
+       if(temp > 5)
+       temp = 5; 
     }
     else
     {
-	   if(temp > 13)
-	   temp = 13; 
+       if(temp > 13)
+       temp = 13; 
     }
-	addUnitForecast(aiPlanGetVariableInt(gCivPopPlanID, cTrainPlanUnitType, 0), temp);	
-	
+    addUnitForecast(aiPlanGetVariableInt(gCivPopPlanID, cTrainPlanUnitType, 0), temp);	
+    
     if ((gFarming == true) || (kbGetAge() >= cAge2))
-	{
-		float foodGatherersWanted = aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood);   // Percent food gatherers
-		foodGatherersWanted = foodGatherersWanted * kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive); // Actual count
-		temp = foodGatherersWanted - kbUnitCount(cMyID, cUnitTypeFarm, cUnitStateAliveOrBuilding);
-		if (temp < 1)
-		temp = 1;
-		if (temp > 5)
-		temp = 5; 
-		if (temp > 0)
-		addUnitForecast(cUnitTypeFarm, temp);		
-	}  
+    {
+        float foodGatherersWanted = aiPlanGetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood);   // Percent food gatherers
+        foodGatherersWanted = foodGatherersWanted * kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive); // Actual count
+        temp = foodGatherersWanted - kbUnitCount(cMyID, cUnitTypeFarm, cUnitStateAliveOrBuilding);
+        if (temp < 1)
+        temp = 1;
+        if (temp > 5)
+        temp = 5; 
+        if (temp > 0)
+        addUnitForecast(cUnitTypeFarm, temp);		
+    }  
    
     if (gFishing == true)
     {
         if (kbUnitCount(cMyID, cUnitTypeDock, cUnitStateAliveOrBuilding) < 1)
         addUnitForecast(cUnitTypeDock, 1);
         int Number = 50;
-		if (kbGetAge() < cAge2)
-	    Number = 125;
-		int fishBoatType = kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionFish,0);
-		int boatCount = kbUnitCount(cMyID, fishBoatType, cUnitStateAlive);
-	    temp = gNumBoatsToMaintain - boatCount;
-		if (temp <= 1)
-		temp = 1;
-		gWoodForecast = gWoodForecast + Number*temp;
-	}
-	if (kbUnitCount(cMyID, cUnitTypeTemple, cUnitStateAliveOrBuilding)  < 1)
+        if (kbGetAge() < cAge2)
+        Number = 125;
+        int fishBoatType = kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionFish,0);
+        int boatCount = kbUnitCount(cMyID, fishBoatType, cUnitStateAlive);
+        temp = gNumBoatsToMaintain - boatCount;
+        if (temp <= 1)
+        temp = 1;
+        gWoodForecast = gWoodForecast + Number*temp;
+    }
+    if (kbUnitCount(cMyID, cUnitTypeTemple, cUnitStateAliveOrBuilding)  < 1)
     addUnitForecast(cUnitTypeTemple, 1);
-		
+        
     if ((kbGetAge() >= cAge2) || (kbGetTechStatus(gAge2MinorGod) == cTechStatusResearching))
-	{	
+    {	
         if (gBuildWalls == true)
-		gGoldForecast = gGoldForecast + 300;
-		int Armory = cUnitTypeArmory;
+        gGoldForecast = gGoldForecast + 300;
+        int Armory = cUnitTypeArmory;
         if (cMyCiv == cCivThor)
         Armory = cUnitTypeDwarfFoundry;
-		// Settlements
-		if (kbUnitCount(0, cUnitTypeAbstractSettlement) > 0)
-		addUnitForecast(cUnitTypeSettlementLevel1, 1);
-	
+        // Settlements
+        if (kbUnitCount(0, cUnitTypeAbstractSettlement) > 0)
+        addUnitForecast(cUnitTypeSettlementLevel1, 1);
+    
         if ((kbUnitCount(cMyID, Armory, cUnitStateAliveOrBuilding) < 1) && (cMyCulture != cCultureEgyptian))
         addUnitForecast(Armory, 1);
-	
-	    if ((kbGetAge() >= cAge3) || (cMyCiv == cCivNuwa) && (kbGetAge() == cAge2))
+    
+        if ((kbGetAge() >= cAge3) || (cMyCiv == cCivNuwa) && (kbGetAge() == cAge2))
         addUnitForecast(cUnitTypeMarket, 1);	
-	
+    
         // military buildings
-		if (cMyCulture == cCultureEgyptian)
-	    gGoldForecast = gGoldForecast + 200;
-		else
-	    gWoodForecast = gWoodForecast + 200;
-		
-		if (gNavalAttackGoalID != -1)
-		{
-			// Ships
-			int myShips = kbUnitCount(cMyID, cUnitTypeLogicalTypeNavalMilitary, cUnitStateAlive);
-			temp = gTargetNavySize+2 - myShips;   // How many yet to train
-			if (temp < 0)
-			temp = 0;
-			if (temp > 0)
-			{
-				gWoodForecast = gWoodForecast + 175*temp;
-				gGoldForecast = gGoldForecast + 100*temp;
-			}		
-		}        
-		if (kbGetAge() >= cAge3)
-		{
-	        if (gTransportMap == true)
-	        gWoodForecast = gWoodForecast + 350;		
-			// Fortress, etc.
+        if (cMyCulture == cCultureEgyptian)
+        gGoldForecast = gGoldForecast + 200;
+        else
+        gWoodForecast = gWoodForecast + 200;
+        
+        if (gNavalAttackGoalID != -1)
+        {
+            // Ships
+            int myShips = kbUnitCount(cMyID, cUnitTypeLogicalTypeNavalMilitary, cUnitStateAlive);
+            temp = gTargetNavySize+2 - myShips;   // How many yet to train
+            if (temp < 0)
+            temp = 0;
+            if (temp > 0)
+            {
+                gWoodForecast = gWoodForecast + 175*temp;
+                gGoldForecast = gGoldForecast + 100*temp;
+            }		
+        }        
+        if (kbGetAge() >= cAge3)
+        {
+            if (gTransportMap == true)
+            gWoodForecast = gWoodForecast + 350;		
+            // Fortress, etc.
             addUnitForecast(MyFortress, 1);
-			
-		    // Fortified TC
-		    if (kbGetTechStatus(cTechFortifyTownCenter) < cTechStatusResearching) 
-		    addTechForecast(cTechFortifyTownCenter);			
-		}
-	}		
+            
+            // Fortified TC
+            if (kbGetTechStatus(cTechFortifyTownCenter) < cTechStatusResearching) 
+            addTechForecast(cTechFortifyTownCenter);			
+        }
+    }		
 }
 
 //==============================================================================
@@ -1705,49 +1705,49 @@ minInterval 12
 inactive
 {	
     static int ageStartTime = -1;
-	int temp = 0;
+    int temp = 0;
     
     if ( (kbGetAge() == cAge3) && (kbGetTechStatus(gAge4MinorGod) < cTechStatusResearching) )	// Upgrade failed, revert
     {
         xsDisableSelf();
         xsEnableRule("econForecastAge3");
         return;
-	}
+    }
     else if ((kbGetAge() > cAge3) && (ageStartTime == -1))
-	ageStartTime = xsGetTime();
-	
+    ageStartTime = xsGetTime();
+    
     gGoldForecast = 600;
     gWoodForecast = 600;
     gFoodForecast = 600;
-	
+    
     float goldSupply = kbResourceGet(cResourceGold);
     float woodSupply = kbResourceGet(cResourceWood);
     float foodSupply = kbResourceGet(cResourceFood);
-	
+    
     if ((ageStartTime != -1) && (xsGetTime() - ageStartTime > 5*60*1000))
     {
         if (foodSupply < 1400)
-		gFoodForecast = gFoodForecast + (1400 - foodSupply);
+        gFoodForecast = gFoodForecast + (1400 - foodSupply);
         if (woodSupply < 1200)
-		gWoodForecast = gWoodForecast + (1200 - woodSupply);
+        gWoodForecast = gWoodForecast + (1200 - woodSupply);
         if (goldSupply < 1400)
-		gGoldForecast = gGoldForecast + (1400 - goldSupply);
-	}
+        gGoldForecast = gGoldForecast + (1400 - goldSupply);
+    }
     else
     {
         if (goldSupply < 500)
-		gGoldForecast = gGoldForecast + (500 - goldSupply);
+        gGoldForecast = gGoldForecast + (500 - goldSupply);
         if (woodSupply < 500)
-		gWoodForecast = gWoodForecast + (500 - woodSupply);
+        gWoodForecast = gWoodForecast + (500 - woodSupply);
         if (foodSupply < 500)
-		gFoodForecast = gFoodForecast + (500 - foodSupply);
-	}
+        gFoodForecast = gFoodForecast + (500 - foodSupply);
+    }
     
     if ((TitanAvailable == true) && (kbGetTechStatus(cTechSecretsoftheTitans) < cTechStatusResearching) && (xsGetTime() - ageStartTime > 4*60*1000))
-	addTechForecast(cTechSecretsoftheTitans);
-	
-	AddGenForecastNeeds();
-	setMilitaryUnitCostForecast(); // add units before scaling down
+    addTechForecast(cTechSecretsoftheTitans);
+    
+    AddGenForecastNeeds();
+    setMilitaryUnitCostForecast(); // add units before scaling down
     updateGathererRatios();
 }
 
@@ -1763,24 +1763,24 @@ inactive
         econForecastAge4();
         xsDisableSelf();
         return;		// We're done
-	}
+    }
     else if ((kbGetAge() == cAge2) && (kbGetTechStatus(gAge3MinorGod) < cTechStatusResearching))	// Upgrade failed, revert
     {
         xsDisableSelf();
         xsEnableRule("econForecastAge2");
         return;
-	}
+    }
     else if ((kbGetAge() == cAge3) && (ageStartTime == -1))
-	ageStartTime = xsGetTime();
+    ageStartTime = xsGetTime();
     
-	gFoodForecast = 500;
+    gFoodForecast = 500;
     gGoldForecast = 500;
     gWoodForecast = 500;
-	
+    
     float goldSupply = kbResourceGet(cResourceGold);
     float woodSupply = kbResourceGet(cResourceWood);
     float foodSupply = kbResourceGet(cResourceFood);
-	
+    
     if ((ageStartTime != -1) && (xsGetTime() - ageStartTime > 4*60*1000))
     {
         if (goldSupply < 1500)
@@ -1801,7 +1801,7 @@ inactive
     }	
 
     AddGenForecastNeeds();
-	setMilitaryUnitCostForecast(); // add units before scaling down
+    setMilitaryUnitCostForecast(); // add units before scaling down
     updateGathererRatios();
 }
 
@@ -1817,25 +1817,25 @@ inactive
         econForecastAge3();
         xsDisableSelf();
         return;		// We're done
-	}
+    }
     else if ((kbGetAge() == cAge1) && (kbGetTechStatus(gAge2MinorGod) < cTechStatusResearching))	// Upgrade failed, revert
     {
         xsDisableSelf();
         xsEnableRule("econForecastAge1");
         return;
-	}
+    }
     else if ((kbGetAge() == cAge2) && (ageStartTime == -1))
-	ageStartTime = xsGetTime();
+    ageStartTime = xsGetTime();
     
     // If we've made it here, we're in age 2 (or researching it)
-	gFoodForecast = 400;
-	gGoldForecast = 400;
+    gFoodForecast = 400;
+    gGoldForecast = 400;
     gWoodForecast = 400;
-	
+    
     float goldSupply = kbResourceGet(cResourceGold);
     float woodSupply = kbResourceGet(cResourceWood);
     float foodSupply = kbResourceGet(cResourceFood);  
-	
+    
     if ((ageStartTime != -1) && (xsGetTime() - ageStartTime > 3*60*1000))
     {
         if (goldSupply < 800)
@@ -1857,14 +1857,14 @@ inactive
     // plow etc
     if ((kbGetTechStatus(cTechPlow) < cTechStatusResearching) && (kbUnitCount(cMyID, cUnitTypeFarm, cUnitStateAliveOrBuilding) > 0))
     addTechForecast(cTechPlow);
-	if (kbGetTechStatus(cTechShaftMine) < cTechStatusResearching)
-	addTechForecast(cTechShaftMine);
-	if (kbGetTechStatus(cTechBowSaw) < cTechStatusResearching)
-	addTechForecast(cTechBowSaw);
+    if (kbGetTechStatus(cTechShaftMine) < cTechStatusResearching)
+    addTechForecast(cTechShaftMine);
+    if (kbGetTechStatus(cTechBowSaw) < cTechStatusResearching)
+    addTechForecast(cTechBowSaw);
     
-	AddGenForecastNeeds();
-	if ((xsGetTime() - ageStartTime > 2*60*1000) && (kbGetAge() == cAge2))
-	setMilitaryUnitCostForecast(); // add units before scaling down
+    AddGenForecastNeeds();
+    if ((xsGetTime() - ageStartTime > 2*60*1000) && (kbGetAge() == cAge2))
+    setMilitaryUnitCostForecast(); // add units before scaling down
 
     updateGathererRatios();
 }
@@ -1874,53 +1874,53 @@ rule econForecastAge1		// Rule active for mid age 1 (cAge1), gets started in set
 minInterval 0
 inactive
 {
-	xsSetRuleMinIntervalSelf(2);
+    xsSetRuleMinIntervalSelf(2);
     if (kbGetAge() > cAge1)
     {
         xsDisableSelf();
         xsEnableRule("econForecastAge2");
         return;
-	}
-	int mainBaseUnitID = findUnit(cUnitTypeAbstractSettlement, cUnitStateAlive);
-	if ((kbGetAge() == cAge1) && (kbResourceGet(cResourceFood) >= 400) && (kbGetTechStatus(gAge2MinorGod) < cTechStatusResearching))
+    }
+    int mainBaseUnitID = findUnit(cUnitTypeAbstractSettlement, cUnitStateAlive);
+    if ((kbGetAge() == cAge1) && (kbResourceGet(cResourceFood) >= 400) && (kbGetTechStatus(gAge2MinorGod) < cTechStatusResearching))
     aiTaskUnitResearch(mainBaseUnitID, gAge2MinorGod);
-	
+    
     if (kbGetTechStatus(gAge2MinorGod) >= cTechStatusResearching)	
     {	// Next age upgrade is on the way
         xsDisableSelf();
         xsEnableRule("econForecastAge2");
         econForecastAge2();	// Since runImmediately doesn't seem to be working
-	    if (cMyCulture == cCultureEgyptian)
+        if (cMyCulture == cCultureEgyptian)
         gHouseAvailablePopRebuild=30;
         else
         gHouseAvailablePopRebuild=18;		
         return;
-	}
-	
+    }
+    
     // If we've made it here, we're in age 1 (cAge1), we've been in the age at least 2 minutes,
     // and we haven't started the age 2 upgrade.  Let's see what we need.
-	gFoodForecast = 600.0;
-	gGoldForecast = 100.0;
-	if (cMyCulture != cCultureEgyptian)
+    gFoodForecast = 600.0;
+    gGoldForecast = 100.0;
+    if (cMyCulture != cCultureEgyptian)
     gWoodForecast = 200.0;
     else
-	gWoodForecast = 100.0;	
-	
-	if (xsGetTime() > 1*60*1000)
-	{
+    gWoodForecast = 100.0;	
+    
+    if (xsGetTime() > 1*60*1000)
+    {
         if (cMyCulture != cCultureEgyptian)
-	    {
+        {
             gGoldForecast = gGoldForecast + 200;
-			gWoodForecast = gWoodForecast + 300;
-		}
-        else
-	    {
-	        gGoldForecast = gGoldForecast + 300;
-			gWoodForecast = gWoodForecast + 100;
+            gWoodForecast = gWoodForecast + 300;
         }
-	}
+        else
+        {
+            gGoldForecast = gGoldForecast + 300;
+            gWoodForecast = gWoodForecast + 100;
+        }
+    }
 
-	AddGenForecastNeeds();
+    AddGenForecastNeeds();
     updateGathererRatios();
 }
 
@@ -1929,62 +1929,62 @@ void initGreek(void)
 {
     //Modify our favor need.  A pseudo-hack.
     aiSetFavorNeedModifier(10.0);
-	
+    
     //Greek scout types.
     gLandScout=cUnitTypeScout;
     gAirScout=cUnitTypePegasus;
     gWaterScout=cUnitTypeFishingShipGreek;
-	
+    
     //Greeks gather with heroes.
     gGatherRelicType=cUnitTypeHero;
-	
+    
     //Create the Greek scout plan.
-	
+    
     int exploreID=aiPlanCreate("Explore_SpecialGreek", cPlanExplore);
     if (exploreID >= 0)
     {
         aiPlanAddUnitType(exploreID, cUnitTypeScout, 1, 1, 1);
         aiPlanSetDesiredPriority(exploreID, 30);
         aiPlanSetActive(exploreID);
-	}
-	
+    }
+    
     //Poseidon.
     if (cMyCiv == cCivPoseidon)
-	gWaterScout=cUnitTypeHippocampus;
-	
-	
-	// Default to random minor god choices, override below if needed
+    gWaterScout=cUnitTypeHippocampus;
+    
+    
+    // Default to random minor god choices, override below if needed
     gAge2MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge2);
     //Random Age3 God.
     gAge3MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge3);
     //Random Age4 God.
     gAge4MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge4);
-	
+    
     // Control variable overrides
     if (cvAge2GodChoice != -1)
-	gAge2MinorGod = cvAge2GodChoice;
+    gAge2MinorGod = cvAge2GodChoice;
     if (cvAge3GodChoice != -1)
-	gAge3MinorGod = cvAge3GodChoice;
+    gAge3MinorGod = cvAge3GodChoice;
     if (cvAge4GodChoice != -1)
-	gAge4MinorGod = cvAge4GodChoice;
+    gAge4MinorGod = cvAge4GodChoice;
 }
 
 //==============================================================================
 void initEgyptian(void)
 {
-	//Create a simple TC empower plan
-	gEmpowerPlanID=aiPlanCreate("Pharaoh Empower", cPlanEmpower);
-	if (gEmpowerPlanID >= 0)
-	{
-		aiPlanSetEconomy(gEmpowerPlanID, true);
-		if (cvMapSubType == VINLANDSAGAMAP)
-		aiPlanAddUnitType(gEmpowerPlanID, cUnitTypePharaoh, 0, 0, 1);
-		else
-		aiPlanAddUnitType(gEmpowerPlanID, cUnitTypePharaoh, 1, 1, 1);
-		aiPlanSetVariableInt(gEmpowerPlanID, cEmpowerPlanTargetTypeID, 0, cUnitTypeGranary);
-		aiPlanSetDesiredPriority(gEmpowerPlanID, 85);
-		aiPlanSetActive(gEmpowerPlanID);
-	}
+    //Create a simple TC empower plan
+    gEmpowerPlanID=aiPlanCreate("Pharaoh Empower", cPlanEmpower);
+    if (gEmpowerPlanID >= 0)
+    {
+        aiPlanSetEconomy(gEmpowerPlanID, true);
+        if (cvMapSubType == VINLANDSAGAMAP)
+        aiPlanAddUnitType(gEmpowerPlanID, cUnitTypePharaoh, 0, 0, 1);
+        else
+        aiPlanAddUnitType(gEmpowerPlanID, cUnitTypePharaoh, 1, 1, 1);
+        aiPlanSetVariableInt(gEmpowerPlanID, cEmpowerPlanTargetTypeID, 0, cUnitTypeGranary);
+        aiPlanSetDesiredPriority(gEmpowerPlanID, 85);
+        aiPlanSetActive(gEmpowerPlanID);
+    }
     //Egyptian scout types.
     gLandScout=cUnitTypePriest;
     gAirScout=-1;
@@ -1994,53 +1994,53 @@ void initEgyptian(void)
     
     //Create a simple plan to maintain Priests for land exploration.
     createSimpleMaintainPlan(cUnitTypePriest, gMaintainNumberLandScouts, true, kbBaseGetMainID(cMyID));
-	
+    
     //Turn off auto favor gather.
     aiSetAutoFavorGather(false);
-	
+    
     //Set the build limit for Outposts.
     aiSetMaxLOSProtoUnitLimit(4);
-	
+    
     //Set.
-	if (cMyCiv == cCivSet)
+    if (cMyCiv == cCivSet)
     {
         //Create air explore plans for the hyena.
         int explorePID=aiPlanCreate("Explore_SpecialSetHyena", cPlanExplore);
         if (explorePID >= 0)
         {
             aiPlanAddUnitType(explorePID, cUnitTypeHyenaofSet, 0, 1, 1);
-			aiPlanSetDesiredPriority(explorePID, 90);
+            aiPlanSetDesiredPriority(explorePID, 90);
             aiPlanSetActive(explorePID);
-		}
-	}
-	
-	// Default to random minor god choices, override below if needed
+        }
+    }
+    
+    // Default to random minor god choices, override below if needed
     gAge2MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge2);
     //Random Age3 God.
     gAge3MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge3);
     //Random Age4 God.
     gAge4MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge4);
-	
+    
     // Control variable overrides
     if (cvAge2GodChoice != -1)
-	gAge2MinorGod = cvAge2GodChoice;
+    gAge2MinorGod = cvAge2GodChoice;
     if (cvAge3GodChoice != -1)
-	gAge3MinorGod = cvAge3GodChoice;
+    gAge3MinorGod = cvAge3GodChoice;
     if (cvAge4GodChoice != -1)
-	gAge4MinorGod = cvAge4GodChoice;
+    gAge4MinorGod = cvAge4GodChoice;
 }
 
 //==============================================================================
 void initNorse(void)
 {
-	
+    
     //Set our trained dropsite PUID.
     aiSetTrainedDropsiteUnitTypeID(cUnitTypeOxCart);
-	
-	//Create a reserve plan for our main base for some Ulfsarks if we're not on VS, TM, or Nomad.
+    
+    //Create a reserve plan for our main base for some Ulfsarks if we're not on VS, TM, or Nomad.
 
-	//Create a simple plan to maintain X Ulfsarks.
-	xsEnableRule("ulfsarkMaintain");
+    //Create a simple plan to maintain X Ulfsarks.
+    xsEnableRule("ulfsarkMaintain");
     // On easy or moderate, get two extra oxcarts ASAP before we're at econ pop cap
     if ( aiGetWorldDifficulty() <= cDifficultyModerate )
     {
@@ -2052,12 +2052,12 @@ void initNorse(void)
             aiPlanSetVariableInt(easyOxPlan, cTrainPlanBuildFromType, 0, cUnitTypeAbstractSettlement); 
             aiPlanSetDesiredPriority(easyOxPlan, 100); 
             aiPlanSetActive(easyOxPlan);
-		}
-	}
-	
+        }
+    }
+    
     //Turn off auto favor gather.
     aiSetAutoFavorGather(false);
-	
+    
     if (aiGetGameMode() == cGameModeDeathmatch)
     {
         int dmUlfPlan=aiPlanCreate("dm ulfsarks", cPlanTrain);
@@ -2070,8 +2070,8 @@ void initNorse(void)
             aiPlanSetVariableInt(dmUlfPlan, cTrainPlanBuildFromType, 0, cUnitTypeAbstractSettlement); 
             aiPlanSetDesiredPriority(dmUlfPlan, 99); 
             aiPlanSetActive(dmUlfPlan);
-		}
-	}
+        }
+    }
     //Norse scout types.
     gLandScout=cUnitTypeAbstractScout;
     gAirScout=-1;
@@ -2081,22 +2081,22 @@ void initNorse(void)
     if (cMyCiv == cCivOdin)
     gAirScout = cUnitTypeRaven;
     
-	
-	// Default to random minor god choices, override below if needed
+    
+    // Default to random minor god choices, override below if needed
     gAge2MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge2);
     //Random Age3 God.
     gAge3MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge3);
     //Random Age4 God.
     gAge4MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge4);
-	
+    
     // Control variable overrides
     if (cvAge2GodChoice != -1)
-	gAge2MinorGod = cvAge2GodChoice;
+    gAge2MinorGod = cvAge2GodChoice;
     if (cvAge3GodChoice != -1)
-	gAge3MinorGod = cvAge3GodChoice;
+    gAge3MinorGod = cvAge3GodChoice;
     if (cvAge4GodChoice != -1)
-	gAge4MinorGod = cvAge4GodChoice;
-	
+    gAge4MinorGod = cvAge4GodChoice;
+    
     //Enable our no-infantry check.
     xsEnableRule("norseInfantryCheck");
 }
@@ -2109,7 +2109,7 @@ void initAtlantean(void)
     gWaterScout=cUnitTypeFishingShipAtlantean;
     gAirScout=-1;
     gGatherRelicType = cUnitTypeHero;   //use any hero       
-	
+    
     //Create the atlantean scout plans.
     int exploreID=-1;
     int i = 0;
@@ -2124,49 +2124,49 @@ void initAtlantean(void)
             aiPlanSetVariableBool(exploreID, cExplorePlanOracleExplore, 0, true);
             aiPlanSetDesiredPriority(exploreID, 80);  // Allow oracleHero relic plan to steal one
             aiPlanSetActive(exploreID);
-		}
-		
+        }
+        
         if (i == 1)
-		gLandExplorePlanID=exploreID;
-	}  
-	
-	// Make sure we always have at least 1 oracles
-	int oracleMaintainPlanID = createSimpleMaintainPlan(cUnitTypeOracleScout, 1, false, kbBaseGetMainID(cMyID));
-	
+        gLandExplorePlanID=exploreID;
+    }  
+    
+    // Make sure we always have at least 1 oracles
+    int oracleMaintainPlanID = createSimpleMaintainPlan(cUnitTypeOracleScout, 1, false, kbBaseGetMainID(cMyID));
+    
     // Special emergency manor build for Lightning
     if (aiGetGameMode() == cGameModeLightning)
     {                                   
         // Build a manor, just one, ASAP, not military, economy, economy escrow, my main base, 1 builder please.
         createSimpleBuildPlan(cUnitTypeManor, 1, 100, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
-	}
-	
+    }
+    
     // Special emergency manor build for DeathMatch
     if (aiGetGameMode() == cGameModeDeathmatch)
     {                                   
         // Build a manor, just one, ASAP, not military, economy, economy escrow, my main base, 1 builder please.
         createSimpleBuildPlan(cUnitTypeManor, 5, 100, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
-	}   
-	
+    }   
+    
     aiSetAutoFavorGather(false);
-	
+    
     // Default to random minor god choices, override below if needed
     gAge2MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge2);
     //Random Age3 God.
     gAge3MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge3);
     //Random Age4 God.
     gAge4MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge4);
-	
+    
     // Control variable overrides
     if (cvAge2GodChoice != -1)
-	gAge2MinorGod = cvAge2GodChoice;
+    gAge2MinorGod = cvAge2GodChoice;
     if (cvAge3GodChoice != -1)
-	gAge3MinorGod = cvAge3GodChoice;
+    gAge3MinorGod = cvAge3GodChoice;
     if (cvAge4GodChoice != -1)
-	gAge4MinorGod = cvAge4GodChoice;
-	
+    gAge4MinorGod = cvAge4GodChoice;
+    
     // If I'm Kronos.. turn on unbuild..
     if (cMyCiv == cCivKronos)
-	unbuildHandler();
+    unbuildHandler();
 }
 
 
@@ -2174,20 +2174,20 @@ void initAtlantean(void)
 void initChinese(void)
 {
     // Chinese
-	
+    
     gLandScout=cUnitTypeScoutChinese;
     gWaterScout=cUnitTypeFishingShipChinese;
     gAirScout=-1;
     // Use any hero for gathering relics
     gGatherRelicType = cUnitTypeHeroChineseImmortal;   //use Immortal hero       
     gGardenBuildLimit = 2;
-	
-	createSimpleMaintainPlan(cUnitTypeHeroChineseGeneral, 2, false, kbBaseGetMainID(cMyID));
-	cMonkMaintain = createSimpleMaintainPlan(cUnitTypeHeroChineseMonk, aiRandInt(2)+2, false, kbBaseGetMainID(cMyID));
-	eChineseHero = createSimpleMaintainPlan(cUnitTypeHeroChineseImmortal, 1, true, kbBaseGetMainID(cMyID));  // Eco
+    
+    createSimpleMaintainPlan(cUnitTypeHeroChineseGeneral, 2, false, kbBaseGetMainID(cMyID));
+    cMonkMaintain = createSimpleMaintainPlan(cUnitTypeHeroChineseMonk, aiRandInt(2)+2, false, kbBaseGetMainID(cMyID));
+    eChineseHero = createSimpleMaintainPlan(cUnitTypeHeroChineseImmortal, 1, true, kbBaseGetMainID(cMyID));  // Eco
     mChineseImmortal = createSimpleMaintainPlan(cUnitTypeHeroChineseImmortal, 0, false, kbBaseGetMainID(cMyID)); // Mil	
-	
-	//Create the Chinese scout plans.
+    
+    //Create the Chinese scout plans.
     int exploreID=-1;
     for (i = 0; < 2)
     {
@@ -2197,37 +2197,37 @@ void initChinese(void)
             aiPlanAddUnitType(exploreID, cUnitTypeScoutChinese, 0, 1, 1);
             aiPlanSetVariableBool(exploreID, cExplorePlanDoLoops, 0, false);
             aiPlanSetActive(exploreID);
-		}  
+        }  
         if (i == 1)
-		gLandExplorePlanID=exploreID;		
-	}
-	
-	// Make sure we always have at least 1 Scout Cavalry
-	int ChineseScoutMaintainPlanID = createSimpleMaintainPlan(cUnitTypeScoutChinese, 1, false, kbBaseGetMainID(cMyID));
-	
+        gLandExplorePlanID=exploreID;		
+    }
+    
+    // Make sure we always have at least 1 Scout Cavalry
+    int ChineseScoutMaintainPlanID = createSimpleMaintainPlan(cUnitTypeScoutChinese, 1, false, kbBaseGetMainID(cMyID));
+    
     // Special emergency house build for Lightning
     if (aiGetGameMode() == cGameModeLightning)
     {                                   
         // Build a house, just one, ASAP, not military, economy, economy escrow, my main base, 1 builder please.
         createSimpleBuildPlan(cUnitTypeHouse, 1, 100, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
-	}
-	
+    }
+    
     aiSetAutoFavorGather(false);
-	
+    
     // Default to random minor god choices, override below if needed
     gAge2MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge2);
     //Random Age3 God.
     gAge3MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge3);
     //Random Age4 God.
     gAge4MinorGod=kbTechTreeGetMinorGodChoices(aiRandInt(2), cAge4);
-	
+    
     // Control variable overrides
     if (cvAge2GodChoice != -1)
-	gAge2MinorGod = cvAge2GodChoice;
+    gAge2MinorGod = cvAge2GodChoice;
     if (cvAge3GodChoice != -1)
-	gAge3MinorGod = cvAge3GodChoice;
+    gAge3MinorGod = cvAge3GodChoice;
     if (cvAge4GodChoice != -1)
-	gAge4MinorGod = cvAge4GodChoice;
+    gAge4MinorGod = cvAge4GodChoice;
 }
 
 //==============================================================================
@@ -2237,10 +2237,10 @@ int maxUnits=20, int minPop=-1, int maxPop=-1, int numberBuildings=1)
     //Create it.
     int upID=kbUnitPickCreate(name);
     if (upID < 0)
-	return(-1);
-	
+    return(-1);
+    
     //Default init.
-	kbUnitPickResetAll(upID);
+    kbUnitPickResetAll(upID);
     //1 Part Preference, 2 Parts CE, 2 Parts Cost.
     kbUnitPickSetPreferenceWeight(upID, 2.0);
     kbUnitPickSetCombatEfficiencyWeight(upID, 4.0);
@@ -2255,63 +2255,63 @@ int maxUnits=20, int minPop=-1, int maxPop=-1, int numberBuildings=1)
     //Default to land units.
     kbUnitPickSetAttackUnitType(upID, cUnitTypeLogicalTypeLandMilitary);
     kbUnitPickSetGoalCombatEfficiencyType(upID, cUnitTypeLogicalTypeMilitaryUnitsAndBuildings);
-	
+    
     //Setup the military unit preferences.
-	kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractSiegeWeapon, 0.3);
-	kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractArcher, 1.0);
-	kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractInfantry, 0.8);
-	kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractCavalry, 0.7);
-	kbUnitPickSetPreferenceFactor(upID, cUnitTypeMythUnit, 0.3);
-	
-	switch (cMyCulture)
-	{	
-		case cCultureGreek:
-		{
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypePeltast, 0.6);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeHelepolis, 0.1);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypePhysician, 0.0); 
-			if (cMyCiv == cCivHades)
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeCrossbowman, 0.6);	
-		    kbUnitPickSetPreferenceFactor(upID, cUnitTypePhysician, 0.0);
-			break;
-		}
-		case cCultureEgyptian:
-		{
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypePriest, 0.1);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeSiegeTower, 0.1);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeSlinger, 0.6);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractCavalry, 0.8);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeKhopesh, 0.0);
-			if (cMyCiv == cCivSet)
-			{	
-				kbUnitPickSetPreferenceFactor(upID, cUnitTypeRhinocerosofSet, 0.1);
-				kbUnitPickSetPreferenceFactor(upID, cUnitTypeCrocodileofSet, 0.1);
-			}
-			break;
-		}
-		case cCultureNorse:
-		{
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeHeroNorse, 0.1);
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractArcher, 0.0);
-			break;
-		}
-		case cCultureAtlantean:
-		{
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeOracleScout, 0.0); 
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeMaceman, 0.6);
-			break;
-		}			
-		case cCultureChinese:
-		{
-		    kbUnitPickSetPreferenceFactor(upID, cUnitTypeScoutChinese, 0.6);
-			if (cMyCiv == cCivShennong)
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeFireLanceShennong, 1.0);
-			else 
-			kbUnitPickSetPreferenceFactor(upID, cUnitTypeFireLance, 1.0);		
-			break;			
-		}
-	}		
-	kbUnitPickSetPreferenceFactor(upID, cUnitTypeDryad, 0.0);      // This should *only* be produced through the hesperides rule
+    kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractSiegeWeapon, 0.3);
+    kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractArcher, 1.0);
+    kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractInfantry, 0.8);
+    kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractCavalry, 0.7);
+    kbUnitPickSetPreferenceFactor(upID, cUnitTypeMythUnit, 0.3);
+    
+    switch (cMyCulture)
+    {	
+        case cCultureGreek:
+        {
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypePeltast, 0.6);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeHelepolis, 0.1);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypePhysician, 0.0); 
+            if (cMyCiv == cCivHades)
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeCrossbowman, 0.6);	
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypePhysician, 0.0);
+            break;
+        }
+        case cCultureEgyptian:
+        {
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypePriest, 0.1);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeSiegeTower, 0.1);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeSlinger, 0.6);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractCavalry, 0.8);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeKhopesh, 0.0);
+            if (cMyCiv == cCivSet)
+            {	
+                kbUnitPickSetPreferenceFactor(upID, cUnitTypeRhinocerosofSet, 0.1);
+                kbUnitPickSetPreferenceFactor(upID, cUnitTypeCrocodileofSet, 0.1);
+            }
+            break;
+        }
+        case cCultureNorse:
+        {
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeHeroNorse, 0.1);
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeAbstractArcher, 0.0);
+            break;
+        }
+        case cCultureAtlantean:
+        {
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeOracleScout, 0.0); 
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeMaceman, 0.6);
+            break;
+        }			
+        case cCultureChinese:
+        {
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeScoutChinese, 0.6);
+            if (cMyCiv == cCivShennong)
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeFireLanceShennong, 1.0);
+            else 
+            kbUnitPickSetPreferenceFactor(upID, cUnitTypeFireLance, 1.0);		
+            break;			
+        }
+    }		
+    kbUnitPickSetPreferenceFactor(upID, cUnitTypeDryad, 0.0);      // This should *only* be produced through the hesperides rule
     //Done.
     return(upID);
 }
@@ -2323,27 +2323,27 @@ void init(void)
     xsEnableRule("updateFoodBreakdown");
     //We're in a random map.
     aiSetRandomMap(true);
-	
+    
     //Adjust control variable sliders by random amount
     cvRushBoomSlider = (cvRushBoomSlider - cvSliderNoise) + (cvSliderNoise * (aiRandInt(201))/100.0);
     if (cvRushBoomSlider > 1.0)
-	cvRushBoomSlider = 1.0;
+    cvRushBoomSlider = 1.0;
     if (cvRushBoomSlider < -1.0)
-	cvRushBoomSlider = -1.0;
+    cvRushBoomSlider = -1.0;
     cvMilitaryEconSlider = (cvMilitaryEconSlider - cvSliderNoise) + (cvSliderNoise * (aiRandInt(201))/100.0);
     if (cvMilitaryEconSlider > 1.0)
-	cvMilitaryEconSlider = 1.0;
+    cvMilitaryEconSlider = 1.0;
     if (cvMilitaryEconSlider < -1.0)
-	cvMilitaryEconSlider = -1.0;
+    cvMilitaryEconSlider = -1.0;
     cvOffenseDefenseSlider = (cvOffenseDefenseSlider - cvSliderNoise) + (cvSliderNoise * (aiRandInt(201))/100.0);
     if (cvOffenseDefenseSlider > 1.0)
-	cvOffenseDefenseSlider = 1.0;
+    cvOffenseDefenseSlider = 1.0;
     if (cvOffenseDefenseSlider < -1.0)
-	cvOffenseDefenseSlider = -1.0;
+    cvOffenseDefenseSlider = -1.0;
     if (ShowAiEcho == true) aiEcho("Sliders are...RushBoom "+cvRushBoomSlider+", MilitaryEcon "+cvMilitaryEconSlider+", OffenseDefense "+cvOffenseDefenseSlider);
     
-	
-	
+    
+    
     //Startup messages.
     if (ShowAiEcho == true) aiEcho("Greetings, my name is "+cMyName+".");
     if (ShowAiEcho == true) aiEcho("AI Filename='"+cFilename+"'.");
@@ -2351,33 +2351,33 @@ void init(void)
     if (ShowAiEcho == true) aiEcho("Civ="+kbGetCivName(cMyCiv)+".");
     if (ShowAiEcho == true) aiEcho("DifficultyLevel="+aiGetWorldDifficultyName(aiGetWorldDifficulty())+".");
     if (ShowAiEcho == true) aiEcho("Personality="+aiGetPersonality()+".");
-	
+    
     //Find someone to hate.
     if (cvPlayerToAttack < 1)
-	updatePlayerToAttack();
+    updatePlayerToAttack();
     else
-	aiSetMostHatedPlayerID(cvPlayerToAttack);
-	
-	
+    aiSetMostHatedPlayerID(cvPlayerToAttack);
+    
+    
     //Bind our age handlers.
     aiSetAgeEventHandler(cAge2, "age2Handler");
     aiSetAgeEventHandler(cAge3, "age3Handler");
     aiSetAgeEventHandler(cAge4, "age4Handler");
     aiSetAgeEventHandler(cAge5, "age5Handler");
-	
+    
     if (cvMaxAge <= kbGetAge())      // Are we starting at or beyond our max age?
     {
         aiSetPauseAllAgeUpgrades(true);
-	}
-	//My stuff
-	initRethlAge1();
-	
+    }
+    //My stuff
+    initRethlAge1();
+    
     //Setup god power handler
     aiSetGodPowerEventHandler("gpHandler");
-	
+    
     //Setup the resign handler
     aiSetResignEventHandler("resignHandler");
-	
+    
     //Set our town location.
     int TC = findUnit(cUnitTypeAbstractSettlement);
     if (TC != -1)
@@ -2385,7 +2385,7 @@ void init(void)
 
     //Economy.
     initEcon();
-	
+    
     //God Powers
     initGodPowers();
 
@@ -2394,7 +2394,7 @@ void init(void)
     //will be our main base.
     static int settlementQueryID=-1;
     if (settlementQueryID < 0)
-	settlementQueryID=kbUnitQueryCreate("MySettlements");
+    settlementQueryID=kbUnitQueryCreate("MySettlements");
     if (settlementQueryID > -1)
     {
         kbUnitQuerySetPlayerID(settlementQueryID, cMyID);
@@ -2429,11 +2429,11 @@ void init(void)
                 kbBaseSetSettlement(cMyID, newBaseID, true);
                 //Set the main-ness of the base.
                 kbBaseSetMain(cMyID, newBaseID, true);
-			}
-		}
-	}
-	
-	
+            }
+        }
+    }
+    
+    
     //Culture setup.
     switch (cMyCulture)
     {
@@ -2441,108 +2441,108 @@ void init(void)
         {
             initGreek();
             break;
-		}
+        }
         case cCultureEgyptian:
         {
             initEgyptian();
             break;
-		}
+        }
         case cCultureNorse:
         {
             initNorse();
             break;
-		}
+        }
         case cCultureAtlantean:
         {
             initAtlantean();
             break;
-		}
+        }
         case cCultureChinese:
         {
             initChinese();
             break;
-		}		
-	}
-	//Map Specific
+        }		
+    }
+    //Map Specific
     initMapSpecific();
-	
+    
     //Setup the progression to follow these minor gods.
     kbTechTreeAddMinorGodPref(gAge2MinorGod);
     kbTechTreeAddMinorGodPref(gAge3MinorGod);
     kbTechTreeAddMinorGodPref(gAge4MinorGod);
     if (ShowAIDebug == true) aiEcho("Minor god plan is "+kbGetTechName(gAge2MinorGod)+", "+kbGetTechName(gAge3MinorGod)+", "+kbGetTechName(gAge4MinorGod));
-	
+    
     //Set the Explore Danger Threshold.
     aiSetExploreDangerThreshold(300.0);
     //Auto gather our military units.
     aiSetAutoGatherMilitaryUnits(false);
-	
+    
     //Get our house build limit.
     if (cMyCulture == cCultureAtlantean)
-	gHouseBuildLimit = kbGetBuildLimit(cMyID, cUnitTypeManor);
+    gHouseBuildLimit = kbGetBuildLimit(cMyID, cUnitTypeManor);
     else
-	gHouseBuildLimit=kbGetBuildLimit(cMyID, cUnitTypeHouse);
-	
+    gHouseBuildLimit=kbGetBuildLimit(cMyID, cUnitTypeHouse);
+    
     //Set the housing rebuild bound to 4 for the first age.
     if (cMyCulture == cCultureEgyptian)
-	gHouseAvailablePopRebuild=8;
+    gHouseAvailablePopRebuild=8;
     else if (cMyCulture == cCultureAtlantean)
-	gHouseAvailablePopRebuild=6;
+    gHouseAvailablePopRebuild=6;
     else if (cMyCulture == cCultureNorse)
-	gHouseAvailablePopRebuild=8;		
+    gHouseAvailablePopRebuild=8;		
     else
-	gHouseAvailablePopRebuild=5;
-	
+    gHouseAvailablePopRebuild=5;
+    
     //Set the hard pop caps.
     if (aiGetGameMode() == cGameModeLightning)
     {
         gHardEconomyPopCap=35;
         //If we're Norse, get our 5 dwarves.
         if (cMyCulture == cCultureNorse)
-		createSimpleMaintainPlan(cUnitTypeDwarf, 5, true, -1);
-	}
+        createSimpleMaintainPlan(cUnitTypeDwarf, 5, true, -1);
+    }
     else if (aiGetGameMode() == cGameModeDeathmatch)
-	gHardEconomyPopCap=25;   // Essentially shut off vill production until age 4.
+    gHardEconomyPopCap=25;   // Essentially shut off vill production until age 4.
     else
     {
         if (aiGetWorldDifficulty() == cDifficultyEasy)
-		gHardEconomyPopCap=20;
+        gHardEconomyPopCap=20;
         else if (aiGetWorldDifficulty() == cDifficultyModerate)
-		gHardEconomyPopCap=40;
+        gHardEconomyPopCap=40;
         else
-		gHardEconomyPopCap=-1;
-	}
-	
+        gHardEconomyPopCap=-1;
+    }
+    
     //Set the default attack response distance.
-	aiSetAttackResponseDistance(60.0);
-	
+    aiSetAttackResponseDistance(60.0);
+    
     // always wall up, unless the map strictly said no.
-	
-	if (bWallUp == true)
-	{
-	    gBuildWalls = true;
+    
+    if (bWallUp == true)
+    {
+        gBuildWalls = true;
         gBuildWallsAtMainBase = true;
-	}
-	
+    }
+    
     if (mapPreventsWalls() == true)
     {
         gBuildWallsAtMainBase = false;
-	}
-	
-	if (aiGetGameMode() == cGameModeDeathmatch)
-	{
-	    if (gWallsInDM == true)
-		{
-			gBuildWalls = true;
-			gBuildWallsAtMainBase = true;
-		}
-	}	
+    }
+    
+    if (aiGetGameMode() == cGameModeDeathmatch)
+    {
+        if (gWallsInDM == true)
+        {
+            gBuildWalls = true;
+            gBuildWallsAtMainBase = true;
+        }
+    }	
     
     if (cvOkToBuildWalls == false)
     {
         gBuildWalls = false;
         gBuildWallsAtMainBase = false;
-	}
+    }
 
     //set our default stance to defensive.
     aiSetDefaultStance(cUnitStanceDefensive);
@@ -2550,103 +2550,103 @@ void init(void)
     //Decide whether or not we're doing a rush/raid.
     // Rushers will use a smaller econ to age up faster, send more waves and larger waves.
     // Boomers will use a larger econ, hit age 2 later, make smaller armies, and send zero or few waves, hitting age 3 much sooner.
-	
+    
     int rushCount = 0;
     if (cvRushBoomSlider > -0.5) 
-	rushCount = 1;    // Rushcount acts as a bool for the moment.  Rush unless strong boomer.
-	
+    rushCount = 1;    // Rushcount acts as a bool for the moment.  Rush unless strong boomer.
+    
     int rushSize=70;      // Total pop to use in rush armies.
     rushSize = rushSize + (cvRushBoomSlider*(rushSize*0.6)); // Increase/decrease the size up to 60% for rushing 
     if (cvOffenseDefenseSlider > 0)
-	rushSize = rushSize + (cvOffenseDefenseSlider*(rushSize*0.6)); // Increase the size up to 60% for offense 
-	
+    rushSize = rushSize + (cvOffenseDefenseSlider*(rushSize*0.6)); // Increase the size up to 60% for offense 
+    
     if (aiGetWorldDifficulty() == cDifficultyModerate)    // Take it easy on moderate
-	rushSize = rushSize/2;
-	
+    rushSize = rushSize/2;
+    
     if (aiGetWorldDifficulty() == cDifficultyEasy)  // Never rush on easy
     {
         rushCount = 0;
         rushSize = 10;
-	}
-	
+    }
+    
     if (aiGetGameMode() == cGameModeDeathmatch)     // Never rush in DM
-	rushCount = 0;
-	
+    rushCount = 0;
+    
     if ((cvRandomMapName == "king of the hill") && (rushCount < 2))
-	rushCount = 1;                               // Always rush in KotH, even on easy.
-	
+    rushCount = 1;                               // Always rush in KotH, even on easy.
+    
     if ((aiGetWorldDifficulty() > cDifficultyModerate) && (rushCount < 2))
-	rushCount = 2;		
+    rushCount = 2;		
 
     if ((gBuildWallsAtMainBase == true) && (rushCount > 0))
     {  
         // Knock up to 40 pop slots off plan
-		if (rushSize > 80)
-		rushSize = rushSize - 40;
-		else
-		rushSize = rushSize/2;
-	}
+        if (rushSize > 80)
+        rushSize = rushSize - 40;
+        else
+        rushSize = rushSize/2;
+    }
     int numTypes = 2;
-	
+    
     // Finally, adjust rushSize to the per-wave number we need
     if (rushCount > 0)
     {
         rushCount = (rushSize+20)/40;   // +20 to round to closest value
         rushSize = rushSize / rushCount;
-	}
+    }
 
    if (rushSize > 50)
-	  rushSize = 50;
+      rushSize = 50;
   
     if (rushSize < 20)
         rushSize = 20;  // Give unitpicker something to do...
-	
-	if ((cMyCulture == cCultureNorse) || (cMyCulture == cCultureEgyptian))
-	gRushUPID=initUnitPicker("Rush", numTypes, -1, -1, rushSize, rushSize*1.25, 3); // Rush with rushSize pop slots of 3 types and 2 buildings.
+    
+    if ((cMyCulture == cCultureNorse) || (cMyCulture == cCultureEgyptian))
+    gRushUPID=initUnitPicker("Rush", numTypes, -1, -1, rushSize, rushSize*1.25, 3); // Rush with rushSize pop slots of 3 types and 2 buildings.
     else
     gRushUPID=initUnitPicker("Rush", numTypes, -1, -1, rushSize, rushSize*1.25, 2); // Rush with rushSize pop slots of 3 types and 2 buildings.
-	kbUnitPickSetGoalCombatEfficiencyType(gRushUPID, cUnitTypeLogicalTypeLandMilitary);
+    kbUnitPickSetGoalCombatEfficiencyType(gRushUPID, cUnitTypeLogicalTypeLandMilitary);
     // Set a smaller number for first wave.
     int newRushSize = 0;
     newRushSize = rushSize;
     if (rushCount >= 3)
-	newRushSize = rushSize/3;
+    newRushSize = rushSize/3;
     else if (rushCount == 2)
-	newRushSize = rushSize/2;
+    newRushSize = rushSize/2;
     if (newRushSize != rushSize)
-	{
+    {
         if (newRushSize < 20)
-		newRushSize = 20;
+        newRushSize = 20;
         kbUnitPickSetMinimumPop(gRushUPID, newRushSize);
-	}
+    }
     //new stuff for new land attack rule
     gRushSize = rushSize / 3;
     //set the gRushCount in order to enable the tech rules if we only have an idle attack goal in cAge2
     if (gRushCount > 0)
     {
         gRushCount = rushCount + 2;    //since our attack plans don't make several attempts, we increase the rush count
-	}  
+    }  
     else
     {
         gRushCount = rushCount;
-	}
+    }
     
     //set the gFirstRushSize
     if (rushCount >= 1) //gRushCount is now 2, so we need a smaller size for the first rush
     {
         gFirstRushSize = rushSize / 5;
-	}
+    }
     else
     {
         gFirstRushSize = newRushSize / 3;
-	}
-	
-	if (gRushCount > 2)
-	{
-		mRusher = true;
-		BeenmRusher = true;
-	}
-	
+    }
+    
+    if (gRushCount > 2)
+    {
+        mRusher = true;
+        BeenmRusher = true;
+    }
+    
     //Create our UP.
     if (gRushUPID >= 0)
     {
@@ -2659,72 +2659,72 @@ void init(void)
             {
                 //Go for hitpoint upgrade first.
                 aiPlanSetVariableInt(gRushGoalID, cGoalPlanUpgradeFilterType, 0, cUpgradeTypeHitpoints);      		
-			}
-		}
+            }
+        }
         else
         {
             //Create an idle attack goal that will maintain our military until the next age.
             gIdleAttackGID = createSimpleAttackGoal("Idle Force", -1, gRushUPID, -1, 1, 1, kbBaseGetMainID(cMyID), false);
             if (gIdleAttackGID >= 0)
             {
-				aiPlanSetVariableBool(gIdleAttackGID, cGoalPlanIdleAttack, 0, true);
-				aiPlanSetVariableInt(gIdleAttackGID, cGoalPlanUpgradeFilterType, 0, cUpgradeTypeHitpoints);
-				//Reset the rushUPID down to 3 unit type and 1 building.
-				kbUnitPickSetDesiredNumberUnitTypes(gRushUPID, numTypes, 1, true);	
-			}
-		}
-	}
+                aiPlanSetVariableBool(gIdleAttackGID, cGoalPlanIdleAttack, 0, true);
+                aiPlanSetVariableInt(gIdleAttackGID, cGoalPlanUpgradeFilterType, 0, cUpgradeTypeHitpoints);
+                //Reset the rushUPID down to 3 unit type and 1 building.
+                kbUnitPickSetDesiredNumberUnitTypes(gRushUPID, numTypes, 1, true);	
+            }
+        }
+    }
     
     
     //Create our late age attack goal.
     if (aiGetWorldDifficulty() == cDifficultyEasy)
-	gLateUPID=initUnitPicker("Late", 1, -1, -1, 8, 16, gNumberBuildings - 1);
+    gLateUPID=initUnitPicker("Late", 1, -1, -1, 8, 16, gNumberBuildings - 1);
     else if (aiGetWorldDifficulty() == cDifficultyModerate)
     {
         int minPop=20+aiRandInt(14);
         int maxPop=minPop+16;
         if ( aiGetGameMode() != cGameModeDeathmatch )
-		gLateUPID=initUnitPicker("Late", 2, -1, -1, minPop, maxPop, gNumberBuildings);   // Attack with at least 20-33 pop slots, no more than 36-49.
+        gLateUPID=initUnitPicker("Late", 2, -1, -1, minPop, maxPop, gNumberBuildings);   // Attack with at least 20-33 pop slots, no more than 36-49.
         else  // DM, double number of buildings
-		gLateUPID=initUnitPicker("Late", 2, -1, -1, minPop, maxPop, gNumberBuildings+2);   // Attack with at least 20-33 pop slots, no more than 36-49.
-	}
+        gLateUPID=initUnitPicker("Late", 2, -1, -1, minPop, maxPop, gNumberBuildings+2);   // Attack with at least 20-33 pop slots, no more than 36-49.
+    }
     else
     {
         minPop=40+aiRandInt(20);
         maxPop=70;
         if (aiGetWorldDifficulty() > cDifficultyHard)
-		maxPop = 90;
+        maxPop = 90;
         
         if (aiGetGameMode() != cGameModeDeathmatch)
-		gLateUPID=initUnitPicker("Late", 3, -1, -1, minPop, maxPop, gNumberBuildings);    // Min: 40-59, max 70 pop slots
+        gLateUPID=initUnitPicker("Late", 3, -1, -1, minPop, maxPop, gNumberBuildings);    // Min: 40-59, max 70 pop slots
         else  // Double buildings in DM
-		gLateUPID=initUnitPicker("Late", 3, -1, -1, minPop, maxPop, gNumberBuildings+2);    // Min: 40-59, max 70 pop slots
-	}
+        gLateUPID=initUnitPicker("Late", 3, -1, -1, minPop, maxPop, gNumberBuildings+2);    // Min: 40-59, max 70 pop slots
+    }
     
     int lateAttackAge = 2;
-	
+    
     if (gLateUPID >= 0)
     {
         if (aiGetGameMode() == cGameModeDeathmatch)
-		lateAttackAge = 3;
-		
+        lateAttackAge = 3;
+        
         gLandAttackGoalID = createSimpleAttackGoal("Main Land Attack", -1, gLateUPID, -1, lateAttackAge, -1, kbBaseGetMainID(cMyID), true);
         if (gLandAttackGoalID >= 0)
         {
             //If this is easy, this is an idle attack.
             if (aiGetWorldDifficulty() == cDifficultyEasy)
-			aiPlanSetVariableBool(gLandAttackGoalID, cGoalPlanIdleAttack, 0, true);
-			
+            aiPlanSetVariableBool(gLandAttackGoalID, cGoalPlanIdleAttack, 0, true);
+            
             aiPlanSetVariableInt(gLandAttackGoalID, cGoalPlanUpgradeFilterType, 0, cUpgradeTypeHitpoints);
-		}
-	}
+        }
+    }
 
     //Create our econ goal (which is really just to store stuff together).
     gGatherGoalPlanID=aiPlanCreate("GatherGoals", cPlanGatherGoal);
     if (gGatherGoalPlanID >= 0)
     {
         //Overall percentages.
-	    aiPlanSetDesiredPriority(gGatherGoalPlanID, 90);	
+        aiPlanSetDesiredPriority(gGatherGoalPlanID, 90);	
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanScriptRPGPct, 0, 1.0);
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanCostRPGPct, 0, 1.0);
         aiPlanSetNumberVariableValues(gGatherGoalPlanID, cGatherGoalPlanGathererPct, 4, true);
@@ -2732,14 +2732,14 @@ void init(void)
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceWood, 0.0);
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFood, 1.0);
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanGathererPct, cResourceFavor, 0.0);
-		
+        
         //Standard RB setup.
         aiPlanSetNumberVariableValues(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, 5, true);
         aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeHunt, 0);
-		if (aiGetGameMode() == cGameModeDeathmatch) 
-	    aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeEasy, 0);
-	    else
-		aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeEasy, 1);
+        if (aiGetGameMode() == cGameModeDeathmatch) 
+        aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeEasy, 0);
+        else
+        aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeEasy, 1);
         aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeHuntAggressive, 0);
         aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeFarm, 0);
         aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeFish, 0);
@@ -2750,8 +2750,8 @@ void init(void)
         if ((cvRandomMapName == "erebus") || (cvRandomMapName == "river styx"))
         {
             aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanNumFoodPlans, cAIResourceSubTypeEasy, 0);
-			aiSetMinNumberNeedForGatheringAggressvies(1);
-		}		 		
+            aiSetMinNumberNeedForGatheringAggressvies(1);
+        }		 		
         //Cost weights.
         aiPlanSetNumberVariableValues(gGatherGoalPlanID, cGatherGoalPlanResourceCostWeight, 4, true);
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanResourceCostWeight, cResourceGold, 1.0);
@@ -2759,31 +2759,31 @@ void init(void)
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanResourceCostWeight, cResourceFood, 1.0);
         aiPlanSetVariableFloat(gGatherGoalPlanID, cGatherGoalPlanResourceCostWeight, cResourceFavor, 1.0);
         //Set our farm limits.
-		aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanFarmLimitPerPlan, 0, 20);  //  Up from 4
+        aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanFarmLimitPerPlan, 0, 20);  //  Up from 4
         aiPlanSetVariableInt(gGatherGoalPlanID, cGatherGoalPlanMaxFarmLimit, 0, 40);     //  Up from 24
         aiSetFarmLimit(aiPlanGetVariableInt(gGatherGoalPlanID, cGatherGoalPlanFarmLimitPerPlan, 0));
-		aiPlanSetActive(gGatherGoalPlanID);
+        aiPlanSetActive(gGatherGoalPlanID);
         //Do our late econ init.
         postInitEcon();
         //Lastly, update our EM.
         updateEMAllAges();
-	}
-	
+    }
+    
     if ((aiGetGameMode() == cGameModeDeathmatch) || (aiGetGameMode() == cGameModeLightning))  // Add an emergency temple, and 10 houses)
     {
         if (cMyCulture == cCultureAtlantean)
         {
             createSimpleBuildPlan(cUnitTypeTemple, 1, 100, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 2);
             if (aiGetGameMode() == cGameModeDeathmatch)
-			createSimpleBuildPlan(cUnitTypeManor, 2, 95, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
-		}
+            createSimpleBuildPlan(cUnitTypeManor, 2, 95, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
+        }
         else
         {
             createSimpleBuildPlan(cUnitTypeTemple, 1, 100, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 5);
             if (aiGetGameMode() == cGameModeDeathmatch)
-			createSimpleBuildPlan(cUnitTypeHouse, 4, 95, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
-		}
-	}
+            createSimpleBuildPlan(cUnitTypeHouse, 4, 95, false, true, cEconomyEscrowID, kbBaseGetMainID(cMyID), 1);
+        }
+    }
     xsEnableRule("buildInitialTemple");
     xsEnableRule("buildResearchGranary");
     
@@ -2802,15 +2802,15 @@ void init(void)
         if (cMyCulture == cCultureGreek)
         {
             xsEnableRule("maintainAirScouts");
-		}
+        }
         xsEnableRule("airScout1");
         xsEnableRule("airScout2");
-	}
+    }
     
     //enable the fixJammedDropsiteBuildPlans rule
     if ((cMyCulture == cCultureGreek) || (cMyCulture == cCultureEgyptian) || (cMyCulture == cCultureChinese))
-	xsEnableRule("fixJammedDropsiteBuildPlans");
-	
+    xsEnableRule("fixJammedDropsiteBuildPlans");
+    
     //enable the tacticalBuildings rule
     xsEnableRule("tacticalBuildings");
     
@@ -2818,21 +2818,21 @@ void init(void)
     {
         //enable our makeAtlanteanHeroes rule
         xsEnableRule("makeAtlanteanHeroes");
-	}
+    }
     
     if (cMyCulture == cCultureEgyptian)
-	xsEnableRule("trainMercs");
+    xsEnableRule("trainMercs");
 
-	
+    
     if (cMyCulture != cCultureGreek)
     {
         //enable the relicUnitHandler rule
         xsEnableRule("relicUnitHandler");
-	}
+    }
     
     //enable the startLandScouting rule
     xsEnableRule("startLandScouting");
-	
+    
     //enable the age1Progress rule
     xsEnableRule("age1Progress");
     
@@ -2841,17 +2841,17 @@ void init(void)
     
     //enable the dockMonitor rule
     xsEnableRule("dockMonitor");
-	
+    
     //enable the spotAgeUpgrades rule
     xsEnableRule("spotAgeUpgrades");
     
     //Relics:  Always on Hard or Nightmare, 50% of the time on Moderate, Never on Easy.
     bool gatherRelics = true;
     if ((aiGetWorldDifficulty() == cDifficultyEasy) || ((aiGetWorldDifficulty() == cDifficultyModerate) && (aiRandInt(2) == 0)))
-	gatherRelics = false;
+    gatherRelics = false;
     //If we're going to gather relics, do it.
     if (cvOkToGatherRelics == false)
-	gatherRelics = false;
+    gatherRelics = false;
     if (gatherRelics == true)
     xsEnableRule("goAndGatherRelics");
 
@@ -2865,7 +2865,7 @@ void init(void)
     
     //update player to attack
     xsEnableRule("updatePlayerToAttack");
-	
+    
     //Force an armory to go down
     xsEnableRule("buildArmory");
 }
@@ -2877,18 +2877,18 @@ void age2Handler(int age=1)
     if (cvMaxAge == age)
     {
         aiSetPauseAllAgeUpgrades(true);
-	} 
+    } 
     
     xsEnableRule("monitorAttPlans");
     xsEnableRule("monitorDefPlans");
     xsEnableRule("baseAttackTracker");
     xsEnableRule("otherBasesDefPlans");
     xsEnableRule("getNextGathererUpgrade"); 
-	
+    
     //activate ObeliskClearingPlan if there is an Egyptian enemy,
     //enable the hesperides rule if there's an Oranos or Gaia player
     bool hesperidesPower = false;
-	bool UWGate = false;
+    bool UWGate = false;
     int playerID = -1;
     for (playerID = 1; < cNumberPlayers)
     {
@@ -2896,21 +2896,21 @@ void age2Handler(int age=1)
         {
             hesperidesPower = true;
             continue;
-		}
+        }
         if ((playerID == cMyID) || (kbIsPlayerAlly(playerID) == true))
-		continue;
+        continue;
         if ((kbGetCivForPlayer(playerID) == cCivZeus) || (kbGetCivForPlayer(playerID) == cCivHades))
         {
             UWGate = true;
             continue;
-		}			
+        }			
         
-	}
+    }
     
     if (hesperidesPower == true)
-	xsEnableRule("hesperides");
+    xsEnableRule("hesperides");
     if (UWGate == true)
-	xsEnableRule("IHateUnderworldPassages");		
+    xsEnableRule("IHateUnderworldPassages");		
     
     //Econ.
     econAge2Handler(age);
@@ -2920,43 +2920,43 @@ void age2Handler(int age=1)
     gpAge2Handler(age);
     //Naval
     navalAge2Handler(age);
-	
+    
     //Set the housing rebuild bound.
-	if (cMyCulture == cCultureEgyptian)
+    if (cMyCulture == cCultureEgyptian)
     gHouseAvailablePopRebuild=30;
     else
     gHouseAvailablePopRebuild=18;
-	
+    
     //Switch the EM rule.
     updateEMAllAges();	// Make it run right now
-	
+    
     //If we're building towers, do that.  
-	
-	if (cMyCulture != cCultureEgyptian)
-	xsEnableRule("getWatchTower");
-	xsEnableRule("getCrenellations");
-	xsEnableRule("getSignalFires");
-	xsEnableRule("buildMBTower");
-	
+    
+    if (cMyCulture != cCultureEgyptian)
+    xsEnableRule("getWatchTower");
+    xsEnableRule("getCrenellations");
+    xsEnableRule("getSignalFires");
+    xsEnableRule("buildMBTower");
+    
     //Maintain a water transport, if this is a transport map.
     if ((gTransportMap == true) && (gMaintainWaterXPortPlanID < 0) || (cvRandomMapName == "king of the hill") && (KoTHWaterVersion == true))
     {
         gMaintainWaterXPortPlanID=createSimpleMaintainPlan(kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionWaterTransport, 0), 0, true, -1);
-		aiPlanSetDesiredPriority(gMaintainWaterXPortPlanID, 95);
-	}
-	
+        aiPlanSetDesiredPriority(gMaintainWaterXPortPlanID, 95);
+    }
+    
     //Init our myth unit rule.
     xsEnableRule("trainMythUnit");
-	
+    
     //enable our raiding party rule
     xsEnableRule("createRaidingParty");
-	
+    
     //enable the attackEnemySettlement rule
     xsEnableRule("attackEnemySettlement");
     
     //enable the createLandAttack rule
     xsEnableRule("createLandAttack");
-	
+    
     //variables for our buildplans
     vector location = kbBaseGetLocation(cMyID, kbBaseGetMainID(cMyID));
     vector origLocation = location;
@@ -2971,7 +2971,7 @@ void age2Handler(int age=1)
     float bz = xsVectorGetZ(backVector);
     float bxOrig = bx;
     float bzOrig = bz;
-	
+    
     //Greek.
     if (cMyCulture == cCultureGreek)
     {
@@ -2980,60 +2980,60 @@ void age2Handler(int age=1)
         {
             gHero1MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekJason, 1, false, kbBaseGetMainID(cMyID));
             gHero2MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekOdysseus, 1, false, kbBaseGetMainID(cMyID));
-		}
+        }
         else if (cMyCiv == cCivPoseidon)
         {
             gHero1MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekTheseus, 1, false, kbBaseGetMainID(cMyID));
             gHero2MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekHippolyta, 1, false, kbBaseGetMainID(cMyID));
-		}
+        }
         else if (cMyCiv == cCivHades)
         {
             gHero1MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekAjax, 1, false, kbBaseGetMainID(cMyID));
             gHero2MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekChiron, 1, false, kbBaseGetMainID(cMyID));
-		}
+        }
         aiPlanSetDesiredPriority(gHero1MaintainPlan, 100);
         aiPlanSetDesiredPriority(gHero2MaintainPlan, 100);
         
         xsEnableRuleGroup("techsGreekMinorGodAge2");
-		
+        
         if (cMyCiv == cCivHades)
         {
             //Enable the Vaults of Erebus rule
             xsEnableRule("getVaultsOfErebus");
-		}
+        }
         else if (cMyCiv == cCivPoseidon)
         {
             //Enable the Lord of horses rule
             xsEnableRule("getLordOfHorses");
-		}
+        }
         else if (cMyCiv == cCivZeus)
         {
             //Enable the Olympic parentage rule
             xsEnableRule("getOlympicParentage");
-		}
-	}
+        }
+    }
     //Egyptian.
     else if (cMyCulture == cCultureEgyptian)
     {
         //Always want 3 priests
-		gHero1MaintainPlan = createSimpleMaintainPlan(cUnitTypePriest, 3, false, kbBaseGetMainID(cMyID));
-		
+        gHero1MaintainPlan = createSimpleMaintainPlan(cUnitTypePriest, 3, false, kbBaseGetMainID(cMyID));
+        
         //Move our pharaoh empower to a "Dropsite"
         if (gEmpowerPlanID != -1)
-		aiPlanSetVariableInt(gEmpowerPlanID, cEmpowerPlanTargetTypeID, 0, cUnitTypeDropsite);
-		
+        aiPlanSetVariableInt(gEmpowerPlanID, cEmpowerPlanTargetTypeID, 0, cUnitTypeDropsite);
+        
         //If we're Ra, create some more priests and empower with them.
         if (cMyCiv == cCivRa)
         {
-			APlanID=aiPlanCreate("Mining Camp Empower", cPlanEmpower);
+            APlanID=aiPlanCreate("Mining Camp Empower", cPlanEmpower);
             if (APlanID >= 0)
             {
                 aiPlanSetEconomy(APlanID, true);
                 aiPlanAddUnitType(APlanID, cUnitTypePriest, 0, 1, 1);
                 aiPlanSetVariableInt(APlanID, cEmpowerPlanTargetTypeID, 0, cUnitTypeMiningCamp);
-				aiPlanSetDesiredPriority(APlanID, 70);			
-				aiPlanSetActive(APlanID);
-			}
+                aiPlanSetDesiredPriority(APlanID, 70);			
+                aiPlanSetActive(APlanID);
+            }
             BPlanID=aiPlanCreate("Lumber Camp Empower", cPlanEmpower);
             if (BPlanID >= 0)
             {
@@ -3041,50 +3041,50 @@ void age2Handler(int age=1)
                 aiPlanAddUnitType(BPlanID, cUnitTypePriest, 0, 1, 1);
                 aiPlanSetVariableInt(BPlanID, cEmpowerPlanTargetTypeID, 0, cUnitTypeLumberCamp);
                 aiPlanSetDesiredPriority(BPlanID, 70);				
-				aiPlanSetActive(BPlanID);
-			}
-		}        
+                aiPlanSetActive(BPlanID);
+            }
+        }        
         aiPlanSetDesiredPriority(gHero1MaintainPlan, 100);
-		
+        
         //Up the build limit for Outposts.
         aiSetMaxLOSProtoUnitLimit(8);
-	}
+    }
     //Norse.
     else if (cMyCulture == cCultureNorse)
     {
         //We always want 3 Norse heroes.
         gHero1MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroNorse, 3, false, kbBaseGetMainID(cMyID));
         aiPlanSetDesiredPriority(gHero1MaintainPlan, 100);
-		
+        
         //Odin has ravens -> destroy unnecessary scout plans
         if (cMyCiv == cCivOdin)
         {
             aiPlanDestroy(gLandExplorePlanID);
-			xsDisableRule("startLandScouting");
-		}
-	}
+            xsDisableRule("startLandScouting");
+        }
+    }
     
-	if (cMyCulture == cCultureChinese)
-	gGardenBuildLimit = 3;
+    if (cMyCulture == cCultureChinese)
+    gGardenBuildLimit = 3;
 
     if (cMyCiv == cCivOuranos)
-	xsEnableRule("getSafePassage");	
-	
+    xsEnableRule("getSafePassage");	
+    
     //Build walls if we should.
     if (gBuildWalls == true)
     {
         if (gBuildWallsAtMainBase == true)
         {
             xsEnableRule("mainBaseAreaWallTeam1");
-			
-			if ((cMyCulture == cCultureEgyptian) || (cMyCulture == cCultureGreek) || (cMyCulture == cCultureChinese))
-			xsEnableRule("destroyUnnecessaryDropsites");
-		}
+            
+            if ((cMyCulture == cCultureEgyptian) || (cMyCulture == cCultureGreek) || (cMyCulture == cCultureChinese))
+            xsEnableRule("destroyUnnecessaryDropsites");
+        }
         xsEnableRule("otherBaseRingWallTeam1");
         
         //start up the wall upgrades.
         xsEnableRule("WallManager");
-	    if (cMyCulture == cCultureNorse)
+        if (cMyCulture == cCultureNorse)
         xsEnableRule("norseInfantryBuild");
         
         //enable the rule to fix unfinished walls
@@ -3092,22 +3092,22 @@ void age2Handler(int age=1)
         
         //enable the rule to destroy unnecessary dropsites near our mainbase
         if ((cMyCulture == cCultureGreek) || (cMyCulture == cCultureEgyptian) || (cMyCulture == cCultureChinese))
-		xsEnableRule("destroyUnnecessaryDropsites");
-	}
+        xsEnableRule("destroyUnnecessaryDropsites");
+    }
     //build buildings at other bases
     xsEnableRule("buildBuildingsAtOtherBase");
-	
+    
     //build towers at other bases
     xsEnableRule("buildTowerAtOtherBase");  
-		
-	if (cMyCiv == cCivNuwa)
-	{
-		//We can trade now.
-		xsEnableRule("tradeWithCaravans");
-		tradeWithCaravans();
-		xsEnableRule("maintainTradeUnits");
-		xsEnableRule("sendIdleTradeUnitsToRandomBase");	
-	}	
+        
+    if (cMyCiv == cCivNuwa)
+    {
+        //We can trade now.
+        xsEnableRule("tradeWithCaravans");
+        tradeWithCaravans();
+        xsEnableRule("maintainTradeUnits");
+        xsEnableRule("sendIdleTradeUnitsToRandomBase");	
+    }	
 }
 
 //==============================================================================
@@ -3117,7 +3117,7 @@ void age3Handler(int age=2)
     if (cvMaxAge == age)
     {
         aiSetPauseAllAgeUpgrades(true);
-	}
+    }
     //Econ.
     econAge3Handler(age);
     //Progress.
@@ -3126,56 +3126,56 @@ void age3Handler(int age=2)
     gpAge3Handler(age);
     //Naval
     navalAge3Handler(age);
-	
+    
     //kill the rush goals
     if (gRushGoalID != -1)
-	aiPlanDestroy(gRushGoalID);
+    aiPlanDestroy(gRushGoalID);
     if (gIdleAttackGID != -1)
-	aiPlanDestroy(gIdleAttackGID);
+    aiPlanDestroy(gIdleAttackGID);
     
     // build as many fortresses as possible 
     xsEnableRule("buildFortress");
-	
-	if ((aiGetGameMode() != cGameModeConquest) && (aiGetGameMode() != cGameModeDeathmatch))
+    
+    if ((aiGetGameMode() != cGameModeConquest) && (aiGetGameMode() != cGameModeDeathmatch))
     xsEnableRule("watchForFirstWonderStart");
-	
-	if (cMyCulture != cCultureNorse)
-	xsEnableRule("getGuardTower");  
-	xsEnableRule("getBoilingOil");
+    
+    if (cMyCulture != cCultureNorse)
+    xsEnableRule("getGuardTower");  
+    xsEnableRule("getBoilingOil");
 
     //Switch the EM rule.
     updateEMAllAges();
-	
+    
     //Up the number of water transports to maintain.
     if (gMaintainWaterXPortPlanID >= 0)
-	aiPlanSetVariableInt(gMaintainWaterXPortPlanID, cTrainPlanNumberToMaintain, 0, 2);
-	
+    aiPlanSetVariableInt(gMaintainWaterXPortPlanID, cTrainPlanNumberToMaintain, 0, 2);
+    
     //Create new greek hero maintain plans.
     if (cMyCulture == cCultureGreek)
     {
         xsEnableRuleGroup("techsGreekMinorGodAge3");
         if (cMyCiv == cCivZeus)
-		gHero3MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekHeracles, 1, false, kbBaseGetMainID(cMyID));
+        gHero3MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekHeracles, 1, false, kbBaseGetMainID(cMyID));
         else if (cMyCiv == cCivPoseidon)
-		gHero3MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekAtalanta, 1, false, kbBaseGetMainID(cMyID));
+        gHero3MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekAtalanta, 1, false, kbBaseGetMainID(cMyID));
         else if (cMyCiv == cCivHades)
-		gHero3MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekAchilles, 1, false, kbBaseGetMainID(cMyID));
+        gHero3MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekAchilles, 1, false, kbBaseGetMainID(cMyID));
         
         aiPlanSetDesiredPriority(gHero3MaintainPlan, 100);
-	}
+    }
     else if (cMyCulture == cCultureEgyptian)
     {
         aiSetMaxLOSProtoUnitLimit(9);
-	}
+    }
     else if (cMyCulture == cCultureNorse)
     {
         //research axe of muspell
         xsEnableRule("getAxeOfMuspell");
-	}
+    }
     
-	if (cMyCulture == cCultureChinese)
-	gGardenBuildLimit = 10;	
-	
+    if (cMyCulture == cCultureChinese)
+    gGardenBuildLimit = 10;	
+    
     // Build a fortress/palace/whatever...or 4 in DM
     int buildingType = MyFortress;
     int numBuilders = 1;
@@ -3185,28 +3185,28 @@ void age3Handler(int age=2)
         {
             numBuilders = 4;
             break;
-		}
+        }
         case cCultureEgyptian:
         {
             numBuilders = 5;
             break;
-		}
+        }
         case cCultureNorse:
         {
             numBuilders = 3;
             break;
-		}
+        }
         case cCultureAtlantean:
         {
             numBuilders = 1;
             break;
-		}
+        }
         case cCultureChinese:
         {
             numBuilders = 4;
             break;
-		}		
-	}
+        }		
+    }
  
     int strongBuildPlanID=aiPlanCreate("Build Strong Building ", cPlanBuild);
     if (strongBuildPlanID >= 0)
@@ -3215,10 +3215,10 @@ void age3Handler(int age=2)
         
         float x = xsVectorGetX(frontVector);
         float z = xsVectorGetZ(frontVector);
-		
+        
         x = x * 15;
         z = z * 15;
-		
+        
         frontVector = xsVectorSetX(frontVector, x);
         frontVector = xsVectorSetZ(frontVector, z);
         frontVector = xsVectorSetY(frontVector, 0.0);
@@ -3238,16 +3238,16 @@ void age3Handler(int age=2)
         aiPlanSetEscrowID(strongBuildPlanID, cMilitaryEscrowID);
         aiPlanSetBaseID(strongBuildPlanID, kbBaseGetMainID(cMyID));
         aiPlanSetActive(strongBuildPlanID);
-	}
-	
-	if (cMyCiv != cCivNuwa)
-	{
-		xsEnableRule("tradeWithCaravans");
-		tradeWithCaravans();
-		xsEnableRule("maintainTradeUnits");
-		xsEnableRule("sendIdleTradeUnitsToRandomBase");	
-	}
-	
+    }
+    
+    if (cMyCiv != cCivNuwa)
+    {
+        xsEnableRule("tradeWithCaravans");
+        tradeWithCaravans();
+        xsEnableRule("maintainTradeUnits");
+        xsEnableRule("sendIdleTradeUnitsToRandomBase");	
+    }
+    
     //get tax collectors and ambassadors
     xsEnableRule("getTaxCollectors");  
     xsEnableRule("getAmbassadors"); //AI is indeed taxed too!
@@ -3259,7 +3259,7 @@ void age3Handler(int age=2)
     xsEnableRule("getMasons");
     //research heroic fleet on transport maps
     if (gTransportMap == true)
-	xsEnableRule("getHeroicFleet");
+    xsEnableRule("getHeroicFleet");
 }
 
 //==============================================================================
@@ -3268,7 +3268,7 @@ void age4Handler(int age=3)
     if (cvMaxAge == age)
     {
         aiSetPauseAllAgeUpgrades(true);
-	}
+    }
     gLastAgeHandled = cAge4;
     //Econ.
     econAge4Handler(age);
@@ -3276,58 +3276,58 @@ void age4Handler(int age=3)
     progressAge4Handler(age);
     //GP.
     gpAge4Handler(age);
-	
+    
     if ( (aiGetGameMode() != cGameModeConquest) && (aiGetGameMode() != cGameModeDeathmatch) )
-	xsEnableRule("makeWonder");      // Make a wonder if you have spare resources
-	
+    xsEnableRule("makeWonder");      // Make a wonder if you have spare resources
+    
     //Switch the EM rule.
     updateEMAllAges();
     
     //Enable our omniscience rule.
     xsEnableRule("getOmniscience");
-	
+    
     // Get trade unit speed upgrade
     xsEnableRule("getCoinage");
-	
+    
     //Econ.
-	
+    
     //Create new greek hero maintain plans.
     if (cMyCulture == cCultureGreek)
     {
         xsEnableRule("getBeastSlayer");
         if (cMyCiv == cCivZeus)
-		gHero4MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekBellerophon, 1, false, kbBaseGetMainID(cMyID));
+        gHero4MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekBellerophon, 1, false, kbBaseGetMainID(cMyID));
         else if (cMyCiv == cCivPoseidon)
-		gHero4MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekPolyphemus, 1, false, kbBaseGetMainID(cMyID));
+        gHero4MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekPolyphemus, 1, false, kbBaseGetMainID(cMyID));
         else if (cMyCiv == cCivHades)
-		gHero4MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekPerseus, 1, false, kbBaseGetMainID(cMyID));
-		
+        gHero4MaintainPlan = createSimpleMaintainPlan(cUnitTypeHeroGreekPerseus, 1, false, kbBaseGetMainID(cMyID));
+        
         aiPlanSetDesiredPriority(gHero4MaintainPlan, 100);
-	}
+    }
     else if (cMyCulture == cCultureAtlantean)
     {
         if (gAge4MinorGod == cTechAge4Helios)
         {
             xsEnableRule("buildMirrorTower");
-		}
-	}
-	else if (cMyCulture == cCultureEgyptian)
-	aiSetMaxLOSProtoUnitLimit(11);
+        }
+    }
+    else if (cMyCulture == cCultureEgyptian)
+    aiSetMaxLOSProtoUnitLimit(11);
     
-	
+    
     //If we're in deathmatch, no more hard pop cap.
     if (aiGetGameMode() == cGameModeDeathmatch)
     {
         gHardEconomyPopCap=-1;
         kbEscrowAllocateCurrentResources();
-	}
-	
+    }
+    
     // if we are on a land map or playing conquest make titan
     if ((gTransportMap == false) || (aiGetGameMode() == cGameModeConquest))
     {
         xsEnableRule("getSecretsOfTheTitan");
-	}
-	
+    }
+    
     //enable the getEngineers rule
     xsEnableRule("getEngineers");
 }
@@ -3336,19 +3336,19 @@ void age4Handler(int age=3)
 void age5Handler(int age=4)
 {
     gLastAgeHandled = cAge5;
-	
-	// Set Escrow back to normal.
-	kbEscrowSetCap( cEconomyEscrowID, cResourceFood, 300.0);    
+    
+    // Set Escrow back to normal.
+    kbEscrowSetCap( cEconomyEscrowID, cResourceFood, 300.0);    
     kbEscrowSetCap( cEconomyEscrowID, cResourceWood, 300.0);    
     kbEscrowSetCap( cEconomyEscrowID, cResourceGold, 300.0);
     kbEscrowSetCap( cEconomyEscrowID, cResourceFavor, 30.0);
-	//
-	
-	//enable the titanplacement rule
+    //
+    
+    //enable the titanplacement rule
     xsEnableRule("rPlaceTitanGate");
     //enable the randomUpgrader rule
     xsEnableRule("randomUpgrader");
-	
+    
 }
 
 //==============================================================================
@@ -3360,12 +3360,12 @@ active
     {
         xsDisableSelf();     // Must be re-enabled if cvOkToResign is set true.
         return;     
-	}
-	
+    }
+    
     //Don't resign too soon.
     if (xsGetTime() < 10*60*1000)
-	return;
-	
+    return;
+    
     //Don't resign if you're teamed with a human.
     static bool checkTeamedWithHuman=true;
     if (checkTeamedWithHuman == true)
@@ -3373,30 +3373,30 @@ active
         for (i=1; < cNumberPlayers)
         {
             if (i == cMyID)
-			continue;
+            continue;
             //Skip if not human.
             if (kbIsPlayerHuman(i) == false)
-			continue;
+            continue;
             //If this is a mutually allied human, go away.
             if (kbIsPlayerMutualAlly(i) == true)
             {
                 xsDisableSelf();
                 return;
-			}
-		}
+            }
+        }
         //Don't check again.
         checkTeamedWithHuman=false;
-	}
-	
-	if (IhaveAllies == true)
-	{
-		int NorseBuilders=kbUnitCount(cMyID, cUnitTypeAbstractInfantry, cUnitStateAlive);
-		int TotalMilBuildings=kbUnitCount(cMyID, cUnitTypeLogicalTypeBuildingsThatTrainMilitary,  cUnitStateAlive);
-		if ((NorseBuilders > 0) && (cMyCulture == cCultureNorse) || (TotalMilBuildings > 0) && (kbGetPopCap() >= 5))
-		return;
-	}
-	
-	
+    }
+    
+    if (IhaveAllies == true)
+    {
+        int NorseBuilders=kbUnitCount(cMyID, cUnitTypeAbstractInfantry, cUnitStateAlive);
+        int TotalMilBuildings=kbUnitCount(cMyID, cUnitTypeLogicalTypeBuildingsThatTrainMilitary,  cUnitStateAlive);
+        if ((NorseBuilders > 0) && (cMyCulture == cCultureNorse) || (TotalMilBuildings > 0) && (kbGetPopCap() >= 5))
+        return;
+    }
+    
+    
     int numSettlements=kbUnitCount(cMyID, cUnitTypeAbstractSettlement, cUnitStateAliveOrBuilding);
     //If on easy, don't only resign if you have no settlements.
     if (aiGetWorldDifficulty() == cDifficultyEasy)
@@ -3406,27 +3406,27 @@ active
             gResignType = cResignSettlements;
             aiAttemptResign(cAICommPromptResignQuestion);
             xsDisableSelf();
-		}
+        }
         return;
-	}
-	
+    }
+    
     //Don't resign if we have over 30 active pop slots.
     if (kbGetPop() >= 30)
-	return;
-	
+    return;
+    
     //Don't quit if we have at least one settlement.
     if ((numSettlements > 1) || (numSettlements > 0) && (IhaveAllies == true))
-	return;
+    return;
     
-	//Don't resign if we still have villagers and teamed up.
-	int numAliveVils=kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive);
-	if ((numAliveVils > 0) && (IhaveAllies == true))
-	return;
-	
-	
+    //Don't resign if we still have villagers and teamed up.
+    int numAliveVils=kbUnitCount(cMyID, cUnitTypeAbstractVillager, cUnitStateAlive);
+    if ((numAliveVils > 0) && (IhaveAllies == true))
+    return;
+    
+    
     int builderUnitID=kbTechTreeGetUnitIDTypeByFunctionIndex(cUnitFunctionBuilder, 0);
     int numBuilders=kbUnitCount(cMyID, cBuilderType, cUnitStateAliveOrBuilding);   
-	
+    
     if ((numSettlements <= 0) && (numBuilders <= 10))
     {
         if (kbCanAffordUnit(cUnitTypeSettlementLevel1, cEconomyEscrowID) == false)
@@ -3435,8 +3435,8 @@ active
             aiAttemptResign(cAICommPromptResignQuestion);
             xsDisableSelf();
             return;
-		}
-	}
+        }
+    }
     //If we don't have any builders, we're not Norse, and we cannot afford anymore, try to resign.
     if ((numBuilders <= 0) && (cMyCulture != cCultureNorse))
     {
@@ -3446,10 +3446,10 @@ active
             aiAttemptResign(cAICommPromptResignQuestion);
             xsDisableSelf();
             return;
-		}
-	}
-	
-	
+        }
+    }
+    
+    
     //3. if all of my teammates have left the game.
     int activeEnemies=0;
     int activeTeammates=0;
@@ -3462,8 +3462,8 @@ active
         {
             currentMilPop=currentMilPop+kbUnitCount(i, cUnitTypeMilitary, cUnitStateAlive);
             continue;
-		}
-		
+        }
+        
         if (kbIsPlayerAlly(i) == false)
         {
             //Increment the active number of enemies there currently are.
@@ -3471,17 +3471,17 @@ active
             {
                 activeEnemies=activeEnemies+1;
                 currentEnemyMilPop=currentEnemyMilPop+kbUnitCount(i, cUnitTypeMilitary, cUnitStateAlive);
-			}
+            }
             continue;
-		}
-		
+        }
+        
         //If I still have an active teammate, don't resign.
         if (kbIsPlayerResigned(i) == true)
-		deadTeammates=deadTeammates+1;
+        deadTeammates=deadTeammates+1;
         else
-		activeTeammates=activeTeammates+1;
-	}
-	
+        activeTeammates=activeTeammates+1;
+    }
+    
     //3a. if at least one player from my team has left the game and I am the only player left on my team, 
     //    and the other team(s) have 2 or more players in the game.
     if ((activeEnemies >= 2) && (activeTeammates <= 0) && (deadTeammates>0))
@@ -3490,13 +3490,13 @@ active
         aiAttemptResign(cAICommPromptResignQuestion);
         xsDisableSelf();
         return;
-	}
-	
+    }
+    
     //4. my mil pop is low and the enemy's mil pop is high,
     //Don't do this eval until 4th age and at least 30 min. into the game.
     if ((xsGetTime() < 30*60*1000) || (kbGetAge() < cAge4))
-	return;
-	
+    return;
+    
     static float enemyMilPopTotal=0.0;
     static float myMilPopTotal=0.0;
     static float count=0.0;
@@ -3507,17 +3507,17 @@ active
     {
         if ((enemyMilPopTotal > (7.0*myMilPopTotal)) || (myMilPopTotal <= count))
         {
-			
+            
             gResignType=cResignMilitaryPop;
             aiAttemptResign(cAICommPromptResignQuestion);
             xsDisableSelf();
             return;
-		}
-		
+        }
+        
         count=0.0;
         enemyMilPopTotal=0.0;
         myMilPopTotal=0.0;
-	}
+    }
 }
 
 //==============================================================================
@@ -3526,28 +3526,28 @@ void resignHandler(int result =-1)
     if (result == 0)
     {
         return;
-	}
-	
+    }
+    
     if (gResignType == cResignGatherers)
     {
         aiResign();
         return;
-	}
+    }
     if (gResignType == cResignSettlements)
     {
         aiResign();
         return;
-	}
+    }
     if (gResignType == cResignTeammates)
     {
         aiResign();
         return;
-	}
+    }
     if (gResignType == cResignMilitaryPop)
     {
         aiResign();
         return;
-	}
+    }
 }
 
 //==============================================================================
@@ -3555,21 +3555,21 @@ rule findFish   //We don't know if this is a water map...if you see fish, it is.
 minInterval 2 //starts in cAge1
 active
 {
-	if ((cRandomMapName == "highland") || (cRandomMapName == "nomad") ||(NoFishing == true) || (cvMapSubType == VINLANDSAGAMAP))
-	{
-		xsDisableSelf();
-		return;
-	}
-	
-	
+    if ((cRandomMapName == "highland") || (cRandomMapName == "nomad") ||(NoFishing == true) || (cvMapSubType == VINLANDSAGAMAP))
+    {
+        xsDisableSelf();
+        return;
+    }
+    
+    
     if (kbUnitCount(0, cUnitTypeFish) > 0)
     {
         gWaterMap=true;
         //Tell the AI what kind of map we are on.
         aiSetWaterMap(gWaterMap);
         xsEnableRule("fishing");		
-	}
-	xsDisableSelf();
+    }
+    xsDisableSelf();
 }
 
 //==============================================================================
@@ -3579,12 +3579,12 @@ minInterval 73 //starts in cAge3    // Hopefully nobody will build one faster th
 inactive
 {
     xsSetRuleMinIntervalSelf(73);
-	int AnyWonder = findUnitByRel(cUnitTypeWonder, cUnitStateAliveOrBuilding, -1, cPlayerRelationAny);
+    int AnyWonder = findUnitByRel(cUnitTypeWonder, cUnitStateAliveOrBuilding, -1, cPlayerRelationAny);
     if (AnyWonder > 0)
     {
         xsDisableSelf();
         xsEnableRule("watchForFirstWonderDone");
-	}
+    }
 }
 
 //==============================================================================
@@ -3595,31 +3595,31 @@ minInterval 2 //starts in cAge3 activated in watchForFirstWonderStart
 {
     static int wonderID = -1;
     static vector wonderLocation = cInvalidVector;
-	int Owner = -1;
-	int EnemyWonder = findUnitByRel(cUnitTypeWonder, cUnitStateAlive, -1, cPlayerRelationEnemy);
+    int Owner = -1;
+    int EnemyWonder = findUnitByRel(cUnitTypeWonder, cUnitStateAlive, -1, cPlayerRelationEnemy);
     int AllyWonder = findUnitByRel(cUnitTypeWonder, cUnitStateAlive, -1, cPlayerRelationAlly);
-	
+    
     static int wonderDefendPlanStartTime = -1;
 
     if (wonderID < 0) // No wonder has been built, look for them
     {
-	    int myWonder = findUnit(cUnitTypeWonder, cUnitStateAlive);
+        int myWonder = findUnit(cUnitTypeWonder, cUnitStateAlive);
         if (myWonder > 0)   // I win, quit.
-		return;
-		
+        return;
+        
         if (EnemyWonder > 0)
         {
             // Create highest-priority defend plan to go kill it
-			Owner = kbUnitGetOwner(EnemyWonder);
+            Owner = kbUnitGetOwner(EnemyWonder);
             wonderID = EnemyWonder;
             wonderLocation = kbUnitGetPosition(wonderID);
-			
+            
             // Making an attack plan instead, they do a better job of transporting and ignoring some targets en route.
             gEnemyWonderDefendPlan=createDefOrAttackPlan("Enemy wonder attack plan", false, -1, 200, cInvalidVector, kbBaseGetMainID(cMyID), 80, false);
             if (gEnemyWonderDefendPlan < 0)
-			return;
+            return;
             aiPlanSetVariableInt(gEnemyWonderDefendPlan, cAttackPlanPlayerID, 0, Owner);
-			
+            
             // Specify other continent so that armies will transport
             aiPlanSetNumberVariableValues( gEnemyWonderDefendPlan, cAttackPlanTargetAreaGroups,  1, true);  
             aiPlanSetVariableInt(gEnemyWonderDefendPlan, cAttackPlanTargetAreaGroups, 0, kbAreaGroupGetIDByPosition(kbUnitGetPosition(wonderID)));
@@ -3627,20 +3627,20 @@ minInterval 2 //starts in cAge3 activated in watchForFirstWonderStart
             
             aiPlanAddUnitType(gEnemyWonderDefendPlan, cUnitTypeLogicalTypeLandMilitary, 200, 200, 200);
             aiPlanSetInitialPosition(gEnemyWonderDefendPlan, kbBaseGetLocation(cMyID, kbBaseGetMainID(cMyID)));
-			
+            
             aiPlanSetVariableBool(gEnemyWonderDefendPlan, cAttackPlanAutoUseGPs, 0, true);
             aiPlanSetVariableBool(gEnemyWonderDefendPlan, cAttackPlanMoveAttack, 0, true);
             aiPlanSetVariableInt(gEnemyWonderDefendPlan, cAttackPlanSpecificTargetID, 0, wonderID);
             
             wonderDefendPlanStartTime = xsGetTime();
             aiPlanSetActive(gEnemyWonderDefendPlan);
-		}
+        }
         else
         {
             if (AllyWonder > 0)
             {
                 // Create highest-priority defend plan to go protect it
-				Owner = kbUnitGetOwner(AllyWonder);
+                Owner = kbUnitGetOwner(AllyWonder);
                 wonderID = AllyWonder;
                 wonderLocation = kbUnitGetPosition(AllyWonder);
                 if ( kbAreaGroupGetIDByPosition(wonderLocation) == kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, kbBaseGetMainID(cMyID))) )
@@ -3651,27 +3651,27 @@ minInterval 2 //starts in cAge3 activated in watchForFirstWonderStart
                         aiPlanAddUnitType(gEnemyWonderDefendPlan, cUnitTypeMilitary, 200, 200, 200);    // All mil units
                         wonderDefendPlanStartTime = xsGetTime();
                         aiPlanSetActive(gEnemyWonderDefendPlan);
-						xsEnableRule("BunkerUpThatWonder");
-					}
-				}
-			}
-		}
-	}
+                        xsEnableRule("BunkerUpThatWonder");
+                    }
+                }
+            }
+        }
+    }
     else  // A wonder was built...if it's down, kill the uber-plan
     {
         if (aiPlanGetState(gEnemyWonderDefendPlan) == cPlanStateAttack)
-		aiPlanSetNoMoreUnits(gEnemyWonderDefendPlan, false);  // Make sure the enemy wonder 'defend' plan stays open
+        aiPlanSetNoMoreUnits(gEnemyWonderDefendPlan, false);  // Make sure the enemy wonder 'defend' plan stays open
         
         if (kbUnitGetCurrentHitpoints(wonderID) <= 0)
         {
             aiPlanDestroy(gEnemyWonderDefendPlan);
             gEnemyWonderDefendPlan = -1;
-			wonderID = -1;
-			xsSetRuleMinInterval("watchForFirstWonderStart", 2);
-			xsEnableRule("watchForFirstWonderStart");
+            wonderID = -1;
+            xsSetRuleMinInterval("watchForFirstWonderStart", 2);
+            xsEnableRule("watchForFirstWonderStart");
             xsDisableSelf();
-		}
-	}
+        }
+    }
 }
 
 //==============================================================================
@@ -3680,19 +3680,19 @@ minInterval 5 //starts in cAge4, activated in make wonder
 inactive
 {
     if (kbUnitCount(cMyID, cUnitTypeWonder, cUnitStateAliveOrBuilding) < 1)
-	{
-		int WonderPlan = findPlanByString("Wonder Build", cPlanBuild);
-		if (WonderPlan == -1)
-		{
-			xsEnableRule("makeWonder"); // plan died? reboot.
-			xsDisableSelf();
-		}
-		return;
-	}
-	
+    {
+        int WonderPlan = findPlanByString("Wonder Build", cPlanBuild);
+        if (WonderPlan == -1)
+        {
+            xsEnableRule("makeWonder"); // plan died? reboot.
+            xsDisableSelf();
+        }
+        return;
+    }
+    
     int wonderID = findUnit(cUnitTypeWonder, cUnitStateAlive);
-	if (wonderID < 0)
-	return;
+    if (wonderID < 0)
+    return;
     xsEnableRule("watchWonderLost");    // Kill the defend plan if the wonder is destroyed.
     vector wonderLocation = kbUnitGetPosition(wonderID);
 
@@ -3702,7 +3702,7 @@ inactive
     {
         aiPlanAddUnitType(gWonderDefendPlan, cUnitTypeMilitary, 20, 200, 200);    // most mil units
         aiPlanSetActive(gWonderDefendPlan);  
-	}
+    }
     xsDisableSelf();
 }
 
@@ -3712,8 +3712,8 @@ minInterval 7 //starts in cAge4, activated in watchForWonder
 inactive
 {
     if (kbUnitCount(cMyID, cUnitTypeWonder, cUnitStateAliveOrBuilding) > 0 )
-	return;
-	
+    return;
+    
     aiPlanDestroy(gWonderDefendPlan);
     xsEnableRule("makeWonder");      // Try again if we get a chance
     xsDisableSelf();
@@ -3725,14 +3725,14 @@ inactive
 minInterval 101 //starts in cAge1
 {
     static int gatherRelicStartTime = -1;
-	
-	int EgyTempleUp = kbUnitCount(cMyID, cUnitTypeTemple, cUnitStateAlive);
-	if (EgyTempleUp < 1 && cMyCulture == cCultureEgyptian)
+    
+    int EgyTempleUp = kbUnitCount(cMyID, cUnitTypeTemple, cUnitStateAlive);
+    if (EgyTempleUp < 1 && cMyCulture == cCultureEgyptian)
     return;
 
     int numRelicGatherers = kbUnitCount(cMyID, gGatherRelicType, cUnitStateAlive);
     if ((numRelicGatherers < 1) && (xsGetTime() < 5*60*1000))
-	return;
+    return;
     
     int activeGatherRelicPlans = aiPlanGetNumber(cPlanGatherRelic, -1, true);
     if (activeGatherRelicPlans > 0)
@@ -3744,18 +3744,18 @@ minInterval 101 //starts in cAge1
             gatherRelicStartTime = -1;
             xsSetRuleMinIntervalSelf(101);
             return;
-		}
+        }
         else
         return;
-	}
-	
+    }
+    
     if (cMyCulture == cCultureEgyptian)
     {
         if (kbGetTechStatus(cTechHandsofthePharaoh) == cTechStatusActive)
         gGatherRelicType = cUnitTypePriest;
-	}
+    }
     gRelicGatherPlanID = aiPlanCreate("Relic Gather", cPlanGatherRelic);
-	
+    
     if (gRelicGatherPlanID >= 0)
     {
         aiPlanAddUnitType(gRelicGatherPlanID, gGatherRelicType, 1, 1, 1);
@@ -3766,7 +3766,7 @@ minInterval 101 //starts in cAge1
         aiPlanSetActive(gRelicGatherPlanID);
         xsSetRuleMinIntervalSelf(307);
         gatherRelicStartTime = xsGetTime();
-	}
+    }
 }
 
 //==============================================================================
@@ -3775,7 +3775,7 @@ minInterval 127 //starts in cAge1
 inactive
 {
     int numPegasus = kbUnitCount(cMyID, cUnitTypePegasus, cUnitStateAlive);   
-	
+    
     if (numPegasus > 0)
     {
         int exploreID = aiPlanCreate("RelicPegasus_Exp", cPlanExplore);
@@ -3786,9 +3786,9 @@ inactive
             aiPlanSetDesiredPriority(exploreID, 98);
             aiPlanSetEscrowID(exploreID, cEconomyEscrowID);
             aiPlanSetActive(exploreID);
-		}
+        }
         xsDisableSelf();
-	}
+    }
 }
 
 //==============================================================================
@@ -3802,82 +3802,82 @@ inactive
         {
             age2Handler();
             return;
-		}
+        }
         else if (gLastAgeHandled == cAge2)
         {
             age3Handler();
             return;
-		}
+        }
         else if (gLastAgeHandled == cAge3)
         {
             age4Handler();
             return;
-		}
+        }
         else if (gLastAgeHandled == cAge4)
         {
             age5Handler();
             xsDisableSelf();
-		}
-	}
+        }
+    }
 }
 //==============================================================================
 void main(void)
 {
     //Set our random seed.  "-1" is a random init.
     aiRandSetSeed(-1);
-	
+    
     //Calculate some areas.
     kbAreaCalculate();
-	
+    
     preInitMap();
     persDecidePersonality();     // Set the control variables before anything else
-	
+    
     //Go.
     if (cvDelayStart != true)
-	init();
+    init();
     else
-	xsDisableRule("age1Progress");
+    xsDisableRule("age1Progress");
 }
 //==============================================================================
 // god power handler
 //==============================================================================
 void gpHandler(int powerProtoID=-1)
 { 
-	if (powerProtoID == -1)
-	return;
-	if (powerProtoID == cPowerSpy)
-	return;
-	
-	//Most hated player chats.
-	if ((powerProtoID == cPowerPlagueofSerpents) ||
-	(powerProtoID == cPowerEarthquake)        ||
-	(powerProtoID == cPowerCurse)             ||
-	(powerProtoID == cPowerFlamingWeapons)    || 
-	(powerProtoID == cPowerForestFire)        ||
-	(powerProtoID == cPowerFrost)             ||
-	(powerProtoID == cPowerLightningStorm)    ||
-	(powerProtoID == cPowerLocustSwarm)       ||
-	(powerProtoID == cPowerMeteor)            ||
-	(powerProtoID == cPowerAncestors)         ||
-	(powerProtoID == cPowerFimbulwinter)      ||
-	(powerProtoID == cPowerTornado)           ||
-	(powerProtoID == cPowerBolt))
-	{
-		aiCommsSendStatement(aiGetMostHatedPlayerID(), cAICommPromptOffensiveGodPower, -1);
-		return;
-	}
-	
-	//Any player chats.
-	int type=cAICommPromptGenericGodPower;
-	if ((powerProtoID == cPowerProsperity) || 
-	(powerProtoID == cPowerPlenty)      ||
-	(powerProtoID == cPowerLure)        ||
-	(powerProtoID == cPowerDwarvenMine) ||
-	(powerProtoID == cPowerGreatHunt)   ||
-	(powerProtoID == cPowerRain))
-	{
-		type=cAICommPromptEconomicGodPower;
-	}
+    if (powerProtoID == -1)
+    return;
+    if (powerProtoID == cPowerSpy)
+    return;
+    
+    //Most hated player chats.
+    if ((powerProtoID == cPowerPlagueofSerpents) ||
+    (powerProtoID == cPowerEarthquake)        ||
+    (powerProtoID == cPowerCurse)             ||
+    (powerProtoID == cPowerFlamingWeapons)    || 
+    (powerProtoID == cPowerForestFire)        ||
+    (powerProtoID == cPowerFrost)             ||
+    (powerProtoID == cPowerLightningStorm)    ||
+    (powerProtoID == cPowerLocustSwarm)       ||
+    (powerProtoID == cPowerMeteor)            ||
+    (powerProtoID == cPowerAncestors)         ||
+    (powerProtoID == cPowerFimbulwinter)      ||
+    (powerProtoID == cPowerTornado)           ||
+    (powerProtoID == cPowerBolt))
+    {
+        aiCommsSendStatement(aiGetMostHatedPlayerID(), cAICommPromptOffensiveGodPower, -1);
+        return;
+    }
+    
+    //Any player chats.
+    int type=cAICommPromptGenericGodPower;
+    if ((powerProtoID == cPowerProsperity) || 
+    (powerProtoID == cPowerPlenty)      ||
+    (powerProtoID == cPowerLure)        ||
+    (powerProtoID == cPowerDwarvenMine) ||
+    (powerProtoID == cPowerGreatHunt)   ||
+    (powerProtoID == cPowerRain))
+    {
+        type=cAICommPromptEconomicGodPower;
+    }
     // If the power is TitanGate, then we need to launch the repair plan to build it..
     if (powerProtoID == cPowerTitanGate)
     {
@@ -3885,14 +3885,14 @@ void gpHandler(int powerProtoID=-1)
         // and then launches a repair plan to build it. 
         xsEnableRule("repairTitanGate");
         return;
-	}
-	//Tell all the enemy players
-	for (i=1; < cNumberPlayers)
-	{
-		if (i == cMyID)
-		continue;
-		if (kbIsPlayerAlly(i) == true)
-		continue;
-		aiCommsSendStatement(i, type, -1);
-	}
+    }
+    //Tell all the enemy players
+    for (i=1; < cNumberPlayers)
+    {
+        if (i == cMyID)
+        continue;
+        if (kbIsPlayerAlly(i) == true)
+        continue;
+        aiCommsSendStatement(i, type, -1);
+    }
 }
