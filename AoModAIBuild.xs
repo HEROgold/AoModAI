@@ -101,7 +101,7 @@ inactive
             int repairPlanIndexID = aiPlanGetIDByIndex(cPlanRepair, -1, true, i);
             int targetID = aiPlanGetVariableInt(repairPlanIndexID, cRepairPlanTargetID, 0);
             vector TarLoc = kbUnitGetPosition(targetID);
-             int Owner = kbUnitGetOwner(targetID);
+            int Owner = kbUnitGetOwner(targetID);
             if (Owner != cMyID)
             {
                 int numUnitsInPlan = aiPlanGetNumberUnits(repairPlanIndexID, cUnitTypeUnit);
