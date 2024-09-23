@@ -2595,9 +2595,9 @@ void init(void)
         rushSize = rushSize / rushCount;
     }
 
-   if (rushSize > 50)
-      rushSize = 50;
-  
+    if (rushSize > 50)
+        rushSize = 50;
+
     if (rushSize < 20)
         rushSize = 20;  // Give unitpicker something to do...
     
