@@ -1,6 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <AI>
-   <script>AoModAIBalanced</script>
-   <name>AoMod AI (Balanced)</name>
+   <script>AoModAIAttacker</script>
+   <name>AoMod AI (Attacker)</name>
+   <!-- <nameID>STR_MP_AI_ATK</nameID> -->
+   <!-- <tooltipID>STR_MP_AI_ATK</tooltipID> -->
+	<!-- <chatset>Shared</chatset> -->
    <playerNames>
       <name>Imhotep<culture>Egyptian</culture></name>
       <name>Miw-sher<culture>Egyptian</culture></name>

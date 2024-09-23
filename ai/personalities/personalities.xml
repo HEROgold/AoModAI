@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Personalities>
+    <Personality>Default</Personality>
+    <Personality>Attacker</Personality>
+    <Personality>Balanced</Personality>
+    <Personality>Defender</Personality>
+    <Personality>Economic</Personality>
+</Personalities>
